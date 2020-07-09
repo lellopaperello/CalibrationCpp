@@ -28,7 +28,4 @@
 
 # Ignored Folders #
 ###################
-test/
-test/*
-Ganser/
-python/
+bozze/
