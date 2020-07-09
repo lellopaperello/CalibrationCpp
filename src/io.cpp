@@ -1,11 +1,8 @@
 // Extension of the program that manages the input and output.
 
-#include <iostream>
-#include <vector>
+#include "io.h"
 
-using namespace std;
-
-void printvec(const vector<int>& v) {
+void io::printvec(const vector<int>& v) {
   for (auto i : v) {
     cout << i;
   }
