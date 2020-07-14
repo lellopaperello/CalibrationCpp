@@ -5,8 +5,27 @@
 
   #include <iostream>
   #include <vector>
+  #include <string>
 
   using namespace std;
+
+// Enum
+enum model_t { GANSER };
+
+// Structures
+struct data_t {
+  string name;
+  string longname;
+  double N;
+  double* vt;
+  double* dv;
+  double* sigma;
+};
+
+struct phi_t{
+  string name;
+  double* vec;
+};
 
 class io
 {
