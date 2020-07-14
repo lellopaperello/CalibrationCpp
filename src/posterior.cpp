@@ -28,27 +28,35 @@
 //                [default] = uniform
 // -----------------------------------------------------------------------------
 
-#include "Posterior.h"
-
-
+#include "posterior.h"
+#include "literature.h"
 
 // Brute Force approach
-// void bruteForce (/* arguments */) {
-//
-//   // Calculate Monomodal posterior elements ------------------------------------
-//   for (int ind = 0; ind < nElem; ind++) {
-//     // From linear index to subscipts
-//
-//     // Creating the current combination o values
-//
-//     // Calculate only the exponent for numerical purpouses
-//     PostElemArray(ind) = ;
-//
-//
-//
-//
-//   }
-// }
+void Posterior::bruteForce (/* arguments */) {
+
+  vector<int> sizeEl, subEl;
+  int nElem;
+  double* phiEl;
+  double* PostElemArray;
+
+  // Calculate Monomodal posterior elements ------------------------------------
+  for (int ind = 0; ind < nElem; ind++) {
+    // From linear index to subscipts
+    ind2sub(sizeEl, ind,  subEl);
+
+    // Creating the current combination of values
+    for (vector<int>::size_type j = 0; j < phi.size(); j++) {
+      phiEl[j] = phi[j].vec[subEl[j+1]];
+    }
+
+    // Calculate only the exponent for numerical purpouses
+    PostElemArray[ind] = data.vt[subEl[0]];
+
+
+
+
+  }
+}
 
 
 void Posterior::cumprod(const vector<int>& size,  vector<int>& k) {
@@ -75,7 +83,7 @@ void Posterior::ind2sub(const vector<int>& size, int ind,  vector<int>& sub) {
   int temp1, temp2;
 
 
-  Posterior::cumprod(size, k);
+  cumprod(size, k);
 
   for (vector<int>::size_type i = k.size(); i > 0; i--) {
     temp1 = (ind - 1) % (k[i-1]) + 1;
@@ -101,7 +109,7 @@ void Posterior::sub2ind(const vector<int>& size, const vector<int>& sub,  int& i
   int         temp;
 
 
-  Posterior::cumprod(size,  k);
+  cumprod(size,  k);
 
   temp = size[0];
   for (vector<int>::size_type i = 1; i < k.size(); i++) {

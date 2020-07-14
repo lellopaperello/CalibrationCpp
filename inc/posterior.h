@@ -5,14 +5,19 @@
 
   #include <string>
   #include <vector>
+  #include "io.h"
 
   using namespace std;
 
 class Posterior
 {
 public:
+  // Attributes
+  data_t        data;
+  vector<phi_t> phi;
 
   // Methods
+  void bruteForce (/* arguments */);
   void cumprod(const vector<int>& size,  vector<int>& k);
   void ind2sub(const vector<int>& size, int ind,  vector<int>& sub);
   void sub2ind(const vector<int>& size, const vector<int>& sub,  int& ind);
@@ -20,4 +25,5 @@ public:
 protected:
 private:
 };
+
 #endif // POSTERIOR_H
