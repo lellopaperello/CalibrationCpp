@@ -2,6 +2,7 @@
 // Contains various models and empirical realtions from the Literature.
 
 #include "literature.h"
+#include "solvers.h"
 
 
 double Literature::CalculateVt(double dv, const vector<double>& phi,
@@ -53,6 +54,7 @@ double Literature::CalculateVt(double dv, const vector<double>& phi,
   };
 
   // Solution
-  //terminalVelocity = fzero(equilibrium, [1e-10 1e3]);
+  BisectionSolver _solver(equilibrium, 1.0e-10, 1.0e3);
+  return _solver.solve();
 
 }
