@@ -34,26 +34,39 @@
 // Brute Force approach
 void Posterior::bruteForce (/* arguments */) {
 
-  vector<int> sizeEl, subEl;
-  int nElem;
-  double* phiEl;
-  double* PostElemArray;
+  // Declarations for the Monomodal posterior array [Mono]
+  // Storage order: PostMono = [data, phi1, ..., phiN]
+  int            nElMono;                   // Number of elements
+  vector<int>    sizeMono (phi.size() + 1); // Size vector
+  vector<int>    subMono  (phi.size() + 1); // Subscripts
+  vector<double> phiMono  (phi.size());     // Current shape parameters
+  vector<double> PostMono;                  // Storage array
+
+  Literature     lit(model);
 
   // Calculate Monomodal posterior elements ------------------------------------
-  for (int ind = 0; ind < nElem; ind++) {
+  sizeMono[0] = data.N;
+  nElMono = data.N;
+  for (vector<int>::size_type i = 0; i < phi.size(); i++) {
+    sizeMono[i+1] = phi[i].N;
+    nElMono *= phi[i].N;
+  }
+
+  PostMono.resize(nElMono);
+
+  for (int ind = 0; ind < nElMono; ind++) {
     // From linear index to subscipts
-    ind2sub(sizeEl, ind,  subEl);
+    ind2sub(sizeMono, ind,  subMono);
 
     // Creating the current combination of values
     for (vector<int>::size_type j = 0; j < phi.size(); j++) {
-      phiEl[j] = phi[j].vec[subEl[j+1]];
+      phiMono[j] = phi[j].vec[subMono[j+1]];
     }
 
     // Calculate only the exponent for numerical purpouses
-    PostElemArray[ind] = data.vt[subEl[0]];
-
-
-
+    PostMono[ind] = (data.vt[subMono[0]]
+                  - lit.CalculateVt(data.dv[subMono[0]], phiMono))
+                  / data.sigma[subMono[0]];
 
   }
 }

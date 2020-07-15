@@ -5,25 +5,39 @@
 
   #include <math.h>
   #include <functional>
-  
+
   #include "io.h"
 
   using namespace std;
 
-// Constants
-#define rho_a 1.225         // air density               [ kg/m^3 ]
-#define mu    1.715e-5      // air viscosity             [ kg/ms ]
-#define g     9.81          // gravity field             [ N/kg ]
-
-
 class Literature
 {
 public:
+  // Constructors
+  Literature(const string& MODEL);
+  Literature(const string& MODEL, double& RHO_A, double& MU, double& G);
+
+  // Destructor
+  ~Literature() {}
+
   // Methods
-  double CalculateVt(double dv, const vector<double>& phi, const model_t& model);
+  double CalculateVt(double dv, const vector<double>& phi);
 
 protected:
 private:
+  // Enum
+  enum model_t { GANSER, HOLTZERSOMMERFELD };
+
+  // Attributes
+  model_t model;  // chosen model     [ string ]
+  double rho_a;   // air density      [ kg/m^3 ]
+  double mu;      // air viscosity    [ kg/ms ]
+  double g;       // gravity field    [ N/kg ]
+
+  // Methods
+  double rho_snow(double& D);
+  model_t GetModel(const string& MODEL);
+
 };
 
 #endif
