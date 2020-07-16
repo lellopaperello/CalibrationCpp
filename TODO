@@ -1,0 +1,38 @@
+TO DO list:
+  (0)    - Write the main
+
+  (0)    - i/o class:
+  (3)      - Write the parser for the INPUT
+  (2)      - Write the OUTPUT functions -> Matlab compatible
+  (4)      - Refine the data structure
+  (4)      - Hardcode the input for testing
+
+  (0)    - Posterior class:
+  (4)      - Arguments of bruteForce function -> ready to be tested
+  (0)      - Finish bruteForce:
+  (3)        - Multimodal posterior
+  (3)        - Norm constraint
+  (1)      - (Implement markovChain solver)
+
+  (0)    - Literature class:
+  (1)      - (Add other models to the implementation ~ H&S)
+  (1)      - (Add the interface for the solver selection)
+
+  (0)    - Solver class:
+  (3)      - Add max iterations and tolerance to the bisection solver
+  (1)      - (Implement new solvers ~ Newton, chord...)
+
+  (0)    - Add Data Acquisition / Generator class
+  (4)      - Test
+  (3)      - Literature
+
+  (2)    - Study the error message handling in c++
+
+  (4)    - Test the version 0
+
+  Importance Legend:
+    (0) -> dependency needed
+    (1) -> marginal
+    (2) -> secondary
+    (3) -> primary
+    (4) -> priority
