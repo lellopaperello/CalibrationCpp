@@ -10,15 +10,6 @@
   using namespace std;
 
 // Structures
-struct data_t {
-  string  name;
-  string  longname;
-  double  N;
-  double* vt;
-  double* dv;
-  double* sigma;
-};
-
 struct phi_t{
   string  name;
   int     N;
