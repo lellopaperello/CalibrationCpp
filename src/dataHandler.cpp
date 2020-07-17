@@ -4,8 +4,23 @@
 
 data_t DataHandler::GenerateTestCase() {
 
+vactor<vector<double>> phi (nParam, vector<double> (nData));
+
   switch (testCase) {
-    case /* value */: {
+    // Generate the random PHI samples
+    case MONOMODAL: {
+      default_random_engine generator;
+      normal_distribution<double> monomodal(mu, sigma);
+
+      for (vector<double>::size_type i = 0; i < nParam; i++) {
+        for (vector<double>::size_type j = 0; j < nData; j++) {
+          phi[i][j] = monomodal(generator);
+        }
+      }
+
+      name = "Standard Distribution"
+      longname = name + ", mu = " + to_string(mu)
+                      + ", sigma = " + to_string(sigma);
     break;
     }
 
