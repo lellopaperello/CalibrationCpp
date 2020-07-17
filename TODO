@@ -8,7 +8,6 @@ TO DO list:
   (4)      - Hardcode the input for testing
 
   (0)    - Posterior class:
-  (4)      - Arguments of bruteForce function -> ready to be tested
   (0)      - Finish bruteForce:
   (3)        - Multimodal posterior
   (3)        - Norm constraint
