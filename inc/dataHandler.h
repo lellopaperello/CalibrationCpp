@@ -1,10 +1,11 @@
-testCase// Header for the DataHandler Class.
+// Header for the DataHandler Class.
 
 #ifndef DATA_HANDLER_H
 #define DATA_HANDLER_H
 
 #include <random>
 #include <string>
+#include <vector>
 
 #include "io.h"
 #include "literature.h"
@@ -13,26 +14,35 @@ using namespace std;
 
 // Structures
 struct data_t {
-  string  name;
-  string  longname;
-  double  N;
-  double* vt;
-  double* dv;
-  double* sigma;
+  string                     name;
+  string                     longname;
+  vector<double> ::size_type N;
+  vector<double>             vt;
+  vector<double>             dv;
+  vector<double>             sigma;
 };
 
+struct testCase_t {
+  string                     name;
+  string                     model;
+  vector<double> ::size_type nParam;
+  double                     mu;
+  double                     sigma;
+};
 
 class DataHandler {
 public:
-  data_t GenerateTestCase();
+  data_t GenerateTestCase(const testCase_t testCase,
+                          const vector<double> ::size_type& nData,
+                          const vector<double>& D);
 
 private:
 protected:
   // Enum
-  enum testCase_t { /* Put Names here */ };
+  enum testName_t { MONOMODAL, BIMODAL };
 
   // Methods
-  model_t GetTestCase(const string& TESTCASE);
+  testName_t GetTestCase(const string& TESTCASE);
 
 };
 

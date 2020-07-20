@@ -8,7 +8,8 @@
 
   #include "io.h"
   #include "dataHandler.h"
-  
+  #include "solvers.h"
+
   using namespace std;
 
 class Literature

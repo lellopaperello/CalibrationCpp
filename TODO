@@ -22,7 +22,7 @@ TO DO list:
   (1)      - (Implement new solvers ~ Newton, chord...)
 
   (0)    - Add Data Acquisition / Generator class
-  (4)      - Test -> Test structure
+  (3)      - Test -> Test structure -> Allow multi parameter
   (3)      - Literature
 
   (2)    - Study the error message handling in c++
