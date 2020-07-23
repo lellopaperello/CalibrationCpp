@@ -32,8 +32,9 @@
 #include "literature.h"
 
 // Brute Force approach
-void Posterior::bruteForce (const data_t& DATA, const vector<phi_t>& PHI,
-                            const string& MODEL) {
+vector<double> Posterior::bruteForce (const data_t& DATA,
+                                      const vector<phi_t>& PHI,
+                                      const string& MODEL) {
 
   // Declarations for the Monomodal posterior array [Mono]
   // Storage order: PostMono = [data, phi1, ..., phiN]
@@ -70,6 +71,8 @@ void Posterior::bruteForce (const data_t& DATA, const vector<phi_t>& PHI,
                   / data.sigma[subMono[0]];
 
   }
+
+  return PostMono;
 }
 
 

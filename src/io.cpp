@@ -2,9 +2,20 @@
 
 #include "io.h"
 
-void io::printvec(const vector<int>& v) {
+void IO::printvec(const vector<int>& v) {
   for (auto i : v) {
     cout << i;
   }
   cout << '\n';
+}
+
+void IO::printPosterior(const vector<double>& v, const string& file) {
+  ofstream out;
+  out.open(file);
+
+  for (auto i : v) {
+    out << i << '\n';
+  }
+
+  out.close();
 }

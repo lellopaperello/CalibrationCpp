@@ -85,7 +85,8 @@ DataHandler::testName_t DataHandler::GetTestCase(const string& TESTCASE) {
     return BIMODAL;
   }
   else {
-    throw "Invalid model selected."; // CAPIRE COME USARE GLI ERRORI
+    cout << "Invalid model selected."; // CAPIRE COME USARE GLI ERRORI
+    return MONOMODAL;
   }
 
 }

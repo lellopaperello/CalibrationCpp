@@ -9,7 +9,7 @@
   #include "io.h"
   #include "dataHandler.h"
   #include "literature.h"
-  
+
   using namespace std;
 
 class Posterior
@@ -22,7 +22,8 @@ public:
   ~Posterior() {}
 
   // Methods
-  void bruteForce (const data_t& DATA, const vector<phi_t>& PHI, const string& MODEL);
+  vector<double> bruteForce (const data_t& DATA, const vector<phi_t>& PHI,
+                             const string& MODEL);
 
   // Useful functions
   void ind2sub(const vector<int>& size, int ind,  vector<int>& sub);

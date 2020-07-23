@@ -28,7 +28,8 @@ Literature::model_t Literature::GetModel(const string& MODEL) {
     return HOLTZERSOMMERFELD;
   }
   else {
-    throw "Invalid model selected."; // CAPIRE COME USARE GLI ERRORI
+    cout << "Invalid model selected."; // CAPIRE COME USARE GLI ERRORI
+    return GANSER;
   }
 }
 
