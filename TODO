@@ -2,10 +2,8 @@ TO DO list:
   (0)    - Write the main
 
   (0)    - i/o class:
-  (3)      - Write the parser for the INPUT
+  (3)      - Write the parser for the INPUT ** Restore phi_t structure **
   (2)      - Write the OUTPUT functions -> Matlab compatible
-  (4)      - Refine the data structure
-  (4)      - Hardcode the input for testing
 
   (0)    - Posterior class:
   (0)      - Finish bruteForce:

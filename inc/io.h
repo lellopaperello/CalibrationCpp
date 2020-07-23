@@ -13,7 +13,7 @@
 struct phi_t{
   string  name;
   int     N;
-  double* vec;
+  double vec[10]; // Just for hardcoded input
 };
 
 class io
@@ -22,4 +22,5 @@ public:
   // Meethods
   void printvec(const vector<int>& v);
 };
+
 #endif // IO_H

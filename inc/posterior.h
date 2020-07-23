@@ -5,10 +5,11 @@
 
   #include <string>
   #include <vector>
-  
+
   #include "io.h"
   #include "dataHandler.h"
-
+  #include "literature.h"
+  
   using namespace std;
 
 class Posterior
