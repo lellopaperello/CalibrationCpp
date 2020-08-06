@@ -9,12 +9,10 @@
 int main(int argc, char const *argv[]) {
 
   DataHandler dataHandler;
-  Posterior   posterior;
   IO          io;
 
   vector<double> post;
   string         postOutFIle = "../res/posterior.txt";
-  
   // Generation of an artificial dataset ---------------------------------------
   data_t data = dataHandler.GenerateTestCase(testCase, nData, D);
 
@@ -25,7 +23,8 @@ int main(int argc, char const *argv[]) {
 
 
   // Data Analysis - Posterior generation --------------------------------------
-  post = posterior.bruteForce(data, phi, model);
+  Posterior   posterior(data, phi, model);
+  post = posterior.bruteForce();
 
 
   // Saving results

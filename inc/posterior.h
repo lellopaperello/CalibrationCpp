@@ -16,14 +16,13 @@ class Posterior
 {
 public:
   // Constructor
-  Posterior() {}
+  Posterior(const data_t& DATA, const vector<phi_t>& PHI, const string& MODEL);
 
   // Destructor
   ~Posterior() {}
 
   // Methods
-  vector<double> bruteForce (const data_t& DATA, const vector<phi_t>& PHI,
-                             const string& MODEL);
+  vector<double> bruteForce ();
 
   // Useful functions
   void ind2sub(const vector<int>& size, int ind,  vector<int>& sub);

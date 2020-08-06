@@ -1,5 +1,5 @@
 TO DO list:
-  (0)    - Write the main
+  (0)    - Complete the main
 
   (0)    - i/o class:
   (3)      - Write the parser for the INPUT ** Restore phi_t structure **
@@ -27,6 +27,9 @@ TO DO list:
 
   (4)    - Test the version 0
            ** DEBUG **
+           - implement some output to test the code
+
+           ** IMPROVE **
            - posterior.cpp -> CONSTRUCTOR (need to set data, phi, model)
                               (Look into "initiaizer lists")
 

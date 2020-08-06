@@ -31,10 +31,16 @@
 #include "posterior.h"
 #include "literature.h"
 
+// Constructor
+Posterior::Posterior(const data_t& DATA, const vector<phi_t>& PHI,
+                       const string& MODEL) {
+  data = DATA;
+  phi = PHI;
+  model = MODEL;
+};
+
 // Brute Force approach
-vector<double> Posterior::bruteForce (const data_t& DATA,
-                                      const vector<phi_t>& PHI,
-                                      const string& MODEL) {
+vector<double> Posterior::bruteForce () {
 
   // Declarations for the Monomodal posterior array [Mono]
   // Storage order: PostMono = [data, phi1, ..., phiN]
