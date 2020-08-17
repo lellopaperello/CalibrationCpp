@@ -26,12 +26,14 @@ TO DO list:
   (2)    - Study the error message handling in c++
 
   (4)    - Test the version 0
-           ** DEBUG **
-           - implement some output to test the code
+           ** DEBUG ** (comparison with the Matlab code)
+           - data.dv      has ZEROS inside --> Check ''DataHandler''
+           - CalculateVt  returns 1e-10 regardless of the inputs
 
            ** IMPROVE **
            - posterior.cpp -> CONSTRUCTOR (need to set data, phi, model)
                               (Look into "initiaizer lists")
+           - io.cpp -> fix the result location
 
   Importance Legend:
     (0) -> dependency needed

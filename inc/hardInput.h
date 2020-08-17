@@ -17,7 +17,7 @@ testCase_t testCase = {
 
 vector<double>::size_type nData = 10;
 
-vector<double> D = {1e-3, 1.25e-3, 1.5e-3};
+vector<double> D = {1e-4, 1.25e-4, 1.5e-4};
 
 
 vector<phi_t> phi = {

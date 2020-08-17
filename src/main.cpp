@@ -12,7 +12,7 @@ int main(int argc, char const *argv[]) {
   IO          io;
 
   vector<double> post;
-  string         postOutFIle = "../res/posterior.txt";
+  string         postOutFIle = "res/posterior.txt";
   // Generation of an artificial dataset ---------------------------------------
   data_t data = dataHandler.GenerateTestCase(testCase, nData, D);
 

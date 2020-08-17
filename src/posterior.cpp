@@ -48,7 +48,8 @@ vector<double> Posterior::bruteForce () {
   vector<int>    sizeMono (phi.size() + 1); // Size vector
   vector<int>    subMono  (phi.size() + 1); // Subscripts
   vector<double> phiMono  (phi.size());     // Current shape parameters
-  vector<double> PostMono;                  // Storage array
+  vector<double> PostMono;                  // Storage array for the posterior
+  vector<long double> PostMonoExp;          // Storage array for the exponent
 
   Literature     lit(model);
 
@@ -61,6 +62,7 @@ vector<double> Posterior::bruteForce () {
   }
 
   PostMono.resize(nElMono);
+  PostMonoExp.resize(nElMono);
 
   for (int ind = 0; ind < nElMono; ind++) {
     // From linear index to subscipts
@@ -72,10 +74,16 @@ vector<double> Posterior::bruteForce () {
     }
 
     // Calculate only the exponent for numerical purpouses
-    PostMono[ind] = (data.vt[subMono[0]]
-                  - lit.CalculateVt(data.dv[subMono[0]], phiMono))
-                  / data.sigma[subMono[0]];
+    PostMonoExp[ind] = -0.5 * pow( ((data.vt[subMono[0]]
+                     - lit.CalculateVt(data.dv[subMono[0]], phiMono))
+                     / data.sigma[subMono[0]]), 2 );
+  }
 
+  // Rescaling and Exponentiating
+  auto max = max_element(begin(PostMonoExp), end(PostMonoExp));
+  for (int ind = 0; ind < nElMono; ind++) {
+    PostMono[ind] = PostMonoExp[ind];
+    // exp(PostMonoExp[ind] - *max);
   }
 
   return PostMono;
@@ -109,8 +117,8 @@ void Posterior::ind2sub(const vector<int>& size, int ind,  vector<int>& sub) {
   cumprod(size, k);
 
   for (vector<int>::size_type i = k.size(); i > 0; i--) {
-    temp1 = (ind - 1) % (k[i-1]) + 1;
-    temp2 = (ind - temp1) / k[i-1] + 1;
+    temp1 = ind % k[i-1];
+    temp2 = (ind - temp1) / k[i-1];
 
     sub[i] = temp2;
     ind = temp1;

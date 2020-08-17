@@ -5,7 +5,8 @@
 
   #include <string>
   #include <vector>
-
+  #include <algorithm>
+  
   #include "io.h"
   #include "dataHandler.h"
   #include "literature.h"
