@@ -27,8 +27,8 @@ TO DO list:
 
   (4)    - Test the version 0
            ** DEBUG ** (comparison with the Matlab code)
-           - data.dv      has ZEROS inside --> Check ''DataHandler''
            - CalculateVt  returns 1e-10 regardless of the inputs
+              - CHECK "rho_snow(dv)" implementation and reference
 
            ** IMPROVE **
            - posterior.cpp -> CONSTRUCTOR (need to set data, phi, model)

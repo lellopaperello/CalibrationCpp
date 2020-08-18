@@ -23,7 +23,7 @@ public:
   ~Literature() {}
 
   // Methods
-  double CalculateVt(double dv, const vector<double>& phi);
+  double CalculateVt(const double dv, const vector<double>& phi);
 
 protected:
 private:
@@ -37,7 +37,7 @@ private:
   double g;       // gravity field    [ N/kg ]
 
   // Methods
-  double rho_snow(double& D);
+  double rho_snow(const double& D);
   model_t GetModel(const string& MODEL);
 
 };

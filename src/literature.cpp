@@ -34,7 +34,7 @@ Literature::model_t Literature::GetModel(const string& MODEL) {
 }
 
 // Terminal Velocity calculator
-double Literature::CalculateVt(double dv, const vector<double>& phi) {
+double Literature::CalculateVt(const double dv, const vector<double>& phi) {
 
   // Number of shape parameters
 
@@ -47,19 +47,22 @@ double Literature::CalculateVt(double dv, const vector<double>& phi) {
   switch (model) {
 
     case GANSER: {
+      if (phi.size() != 2) {
+        cout << "Ganser model requirest 2 parameters!" << '\n';
+      }
       double Phi, dn, K1, K2, Re_v, RE_v;
 
       // Indipendent shape parameters for Ganser's model
       Phi = phi[0];     dn = phi[1] * dv;
 
       // Aspect ratio ~ V / S
-      Ar = 2/3 * pow(dv, 3) / pow(dn, 2);
+      Ar = 2/(double)3 * pow(dv, 3) / pow(dn, 2);
 
       // Stokes shape factor
       K1 = pow(dn/(3*dv) + 2/(3*sqrt(Phi)), -1);
 
       // Newton shape factor
-      K2 = pow(10, (1.8148*(pow(log(Phi), 0.5743))));
+      K2 = pow(10, (1.8148*(pow(abs(log(Phi)), 0.5743))));
 
       // Reynolds number per unit velocity
       Re_v = rho_a * dv / mu;
@@ -73,6 +76,7 @@ double Literature::CalculateVt(double dv, const vector<double>& phi) {
         return K2* (24 / (RE_v*v) * (1 + 0.1118 * pow(RE_v*v, 0.6567))
                  + 0.4305 / (1 + 3305 / (RE_v*v)));
       };
+//cout << cD(1e-10) << '\t' << cD(1e3) << '\n';
       break;
     }
 
@@ -88,7 +92,7 @@ double Literature::CalculateVt(double dv, const vector<double>& phi) {
     return  1/2 * pow(vt, 2) * cD(vt) + (rho_a - rho_snow(dv))/rho_a * Ar * g;
 
   };
-
+cout << equilibrium(1.0e-10) << '\t' << equilibrium(1.0e3) << '\n';
   // Solution
   BisectionSolver _solver(equilibrium, 1.0e-10, 1.0e3);
   return _solver.solve();
@@ -96,7 +100,7 @@ double Literature::CalculateVt(double dv, const vector<double>& phi) {
 }
 
 
-double Literature::rho_snow(double& D) {
+double Literature::rho_snow(const double& D) {
   // Brandes model for the calculation of the snowflakes density as function
   // of the ground temperature ~ Brandes et al. 2007,
   // "A Statistical and Physical Description of Hydrometeor Distributions
@@ -105,6 +109,6 @@ double Literature::rho_snow(double& D) {
   // D: equivalent volume diameter [ m ]
   // rho: snowflake density [kg / m^3]
 
-  D *= 1.0e3;
-  return 0.178e3 * pow(D, -0.922);
+  double D_mm = D * 1.0e3;
+  return 0.178e3 * pow(D_mm, -0.922);
 }

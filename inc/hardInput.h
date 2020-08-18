@@ -10,14 +10,14 @@
 testCase_t testCase = {
   .name = "MONOMODAL",
   .model = "GANSER",
-  .nParam = 1,
+  .nParam = 2,
   .mu = 0.5,
   .sigma = 0.01
 };
 
 vector<double>::size_type nData = 10;
 
-vector<double> D = {1e-4, 1.25e-4, 1.5e-4};
+vector<double> D = {1e-3, 1.25e-3, 1.5e-3};
 
 
 vector<phi_t> phi = {

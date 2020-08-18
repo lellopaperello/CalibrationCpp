@@ -25,7 +25,7 @@ data.sigma.resize(data.N);
   switch (testName) {
 
     case MONOMODAL: {
-      normal_distribution<double> monomodal(testCase.mu, testCase.sigma); // Only 1 parameter allowed
+      normal_distribution<double> monomodal(testCase.mu, testCase.sigma); // Only 1 mode allowed
 
       // Generate the random PHI samples
       for (vector<double>::size_type i = 0; i < nData; i++) {
@@ -60,14 +60,16 @@ data.sigma.resize(data.N);
     normal_distribution<double> diameter(D[i], sigmaD);
 
     for (size_t j = 0; j < nData; j++) {
+      size_t ind = i * nData + j;
+
       // Generate uniformly distributed diameters around the given one
-      data.dv[j*(i+1)] = diameter(generator);
+      data.dv[ind] = diameter(generator);
 
       // Generate terminal velocities from the selected model
-      data.vt[j*(i+1)] = lit.CalculateVt(data.dv[j*(i+1)], phi[j]);
+      data.vt[ind] = lit.CalculateVt(data.dv[ind], phi[j]);
 
       // Measurement error on the Terminal Velocity
-      data.sigma[j*(i+1)] = sigmaVt;
+      data.sigma[ind] = sigmaVt;
     }
   }
 
