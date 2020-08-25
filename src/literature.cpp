@@ -76,7 +76,7 @@ double Literature::CalculateVt(const double dv, const vector<double>& phi) {
         return K2* (24 / (RE_v*v) * (1 + 0.1118 * pow(RE_v*v, 0.6567))
                  + 0.4305 / (1 + 3305 / (RE_v*v)));
       };
-//cout << cD(1e-10) << '\t' << cD(1e3) << '\n';
+
       break;
     }
 
@@ -89,10 +89,10 @@ double Literature::CalculateVt(const double dv, const vector<double>& phi) {
   // Equilibrium equation
   equilibrium = [&] (double vt)
   {
-    return  1/2 * pow(vt, 2) * cD(vt) + (rho_a - rho_snow(dv))/rho_a * Ar * g;
+    return  1/(double)2 * pow(vt, 2) * cD(vt) + (rho_a - rho_snow(dv))/rho_a * Ar * g;
 
   };
-cout << equilibrium(1.0e-10) << '\t' << equilibrium(1.0e3) << '\n';
+
   // Solution
   BisectionSolver _solver(equilibrium, 1.0e-10, 1.0e3);
   return _solver.solve();
