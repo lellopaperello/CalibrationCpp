@@ -26,10 +26,9 @@ TO DO list:
   (2)    - Study the error message handling in c++
 
   (4)    - Test the version 0
-           ** DEBUG ** (comparison with the Matlab code)
-           - CalculateVt  returns 1e-10 regardless of the inputs
-              - CHECK "rho_snow(dv)" implementation and reference
-
+           ** DEBUG **
+           - Invert the order of storage of postMono
+           
            ** IMPROVE **
            - posterior.cpp -> CONSTRUCTOR (need to set data, phi, model)
                               (Look into "initiaizer lists")

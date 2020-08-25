@@ -42,27 +42,36 @@ Posterior::Posterior(const data_t& DATA, const vector<phi_t>& PHI,
 // Brute Force approach
 vector<double> Posterior::bruteForce () {
 
+  // General Declarations
+
   // Declarations for the Monomodal posterior array [Mono]
-  // Storage order: PostMono = [data, phi1, ..., phiN]
-  int            nElMono;                   // Number of elements
-  vector<int>    sizeMono (phi.size() + 1); // Size vector
-  vector<int>    subMono  (phi.size() + 1); // Subscripts
+  // Storage order: PostMono = [phi1, ..., phiN | nData]
+  int            nElMono = 1;               // Number of elements
+  vector<int>    sizeMono (phi.size());     // Size vector
+  vector<int>    subMono  (phi.size());     // Subscripts
   vector<double> phiMono  (phi.size());     // Current shape parameters
-  vector<double> PostMono;                  // Storage array for the posterior
-  vector<long double> PostMonoExp;          // Storage array for the exponent
+  vector<vector<double>> PostMono;          // Storage array for the posterior
+  vector<vector<long double>> PostMonoExp;  // Storage array for the exponent
+
+  // Declarations for the Multimodal posterior array [Multi]
+  // Storage order: PostMulti = [phi1, ..., phiN, pi1, ..., piN]
+  // int            nElMulti = 1;               // Number of elements
+  // vector<int>    sizeMulti                   // Size vector
+  // vector<int>    subMulti                    // Subscripts
+  // vector<double> phiMulti  (phi.size());     // Current shape parameters
+  // vector<double> PostMulti;                  // Storage array for the posterior
+  // vector<long double> PostMultiExp;          // Storage array for the exponent
 
   Literature     lit(model);
 
   // Calculate Monomodal posterior elements ------------------------------------
-  sizeMono[0] = data.N;
-  nElMono = data.N;
   for (vector<int>::size_type i = 0; i < phi.size(); i++) {
-    sizeMono[i+1] = phi[i].N;
+    sizeMono[i] = phi[i].N;
     nElMono *= phi[i].N;
   }
 
-  PostMono.resize(nElMono);
-  PostMonoExp.resize(nElMono);
+  PostMono.resize(nElMono, vector<double> (data.N));
+  PostMonoExp.resize(nElMono, vector<long double> (data.N));
 
   for (int ind = 0; ind < nElMono; ind++) {
     // From linear index to subscipts
@@ -70,21 +79,33 @@ vector<double> Posterior::bruteForce () {
 
     // Creating the current combination of values
     for (vector<int>::size_type j = 0; j < phi.size(); j++) {
-      phiMono[j] = phi[j].vec[subMono[j+1]];
+      phiMono[j] = phi[j].vec[subMono[j]];
     }
 
-    // Calculate only the exponent for numerical purpouses
-    PostMonoExp[ind] = -0.5 * pow( ((data.vt[subMono[0]]
-                     - lit.CalculateVt(data.dv[subMono[0]], phiMono))
-                     / data.sigma[subMono[0]]), 2 );
+    // Cycle over the data
+    for (size_t n = 0; n < data.N; n++) {
+      // Calculate only the exponent for numerical purpouses
+      PostMonoExp[ind][n] = -0.5 * pow( ((data.vt[n]
+                          - lit.CalculateVt(data.dv[n], phiMono))
+                          / data.sigma[n]), 2 );
+
+    }
   }
 
   // Rescaling and Exponentiating
-  auto max = max_element(begin(PostMonoExp), end(PostMonoExp));
+  // auto max = max_element(begin(PostMonoExp), end(PostMonoExp));
+
   for (int ind = 0; ind < nElMono; ind++) {
-    PostMono[ind] = PostMonoExp[ind];
-    // exp(PostMonoExp[ind] - *max);
+    for (size_t n = 0; n < data.N; n++) {
+      PostMono[ind][n] = exp(PostMonoExp[ind][n]); // - *max);
+    }
   }
+
+  // Calculate Multimodal posterior --------------------------------------------
+
+
+
+
 
   return PostMono;
 }
