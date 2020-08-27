@@ -2,7 +2,7 @@ TO DO list:
   (0)    - Complete the main
 
   (0)    - i/o class:
-  (3)      - Write the parser for the INPUT ** Restore phi_t structure **
+  (2)      - Write the parser for the INPUT ** Restore phi_t structure **
   (2)      - Write the OUTPUT functions -> Matlab compatible
 
   (0)    - Posterior class:
@@ -25,10 +25,9 @@ TO DO list:
 
   (2)    - Study the error message handling in c++
 
-  (4)    - Test the version 0
+  (0)    - Test the version 1.0
            ** DEBUG **
-           - Invert the order of storage of postMono
-           
+
            ** IMPROVE **
            - posterior.cpp -> CONSTRUCTOR (need to set data, phi, model)
                               (Look into "initiaizer lists")

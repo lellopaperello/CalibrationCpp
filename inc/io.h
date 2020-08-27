@@ -14,7 +14,7 @@
 struct phi_t{
   string  name;
   int     N;
-  double vec[10]; // Just for hardcoded input
+  double  vec[10]; // Just for hardcoded input
 };
 
 class IO

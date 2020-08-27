@@ -6,11 +6,12 @@
   #include <string>
   #include <vector>
   #include <algorithm>
-  
+
   #include "io.h"
   #include "dataHandler.h"
   #include "literature.h"
-
+  #include "vectorOverload.h"
+  
   using namespace std;
 
 class Posterior
@@ -38,7 +39,8 @@ private:
 
   // Methods
   void cumprod(const vector<int>& size,  vector<int>& k);
-
+  vector<double> normConstraint(const vector<double>& pi);
+  vector<vector<int>> combVec (const vector<vector<int>>& X);
 };
 
 #endif // POSTERIOR_H
