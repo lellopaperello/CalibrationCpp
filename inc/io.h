@@ -14,6 +14,7 @@
 struct phi_t{
   string  name;
   int     N;
+  int     K;
   double  vec[10]; // Just for hardcoded input
 };
 

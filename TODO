@@ -4,11 +4,13 @@ TO DO list:
   (0)    - i/o class:
   (2)      - Write the parser for the INPUT ** Restore phi_t structure **
   (2)      - Write the OUTPUT functions -> Matlab compatible
+  (2)      - Fix the result location
 
   (0)    - Posterior class:
   (0)      - Finish bruteForce:
-  (3)        - Multimodal posterior
-  (3)        - Norm constraint
+  (2)        - CONSTRUCTOR (need to set data, phi, model)
+               (Look into "initiaizer lists")
+  (3)        - Find new names for the variable of the "innerSum cycle"
   (1)      - (Implement markovChain solver)
 
   (0)    - Literature class:
@@ -25,13 +27,9 @@ TO DO list:
 
   (2)    - Study the error message handling in c++
 
-  (0)    - Test the version 1.0
+  (4)    - Test the version 1.0
            ** DEBUG **
 
-           ** IMPROVE **
-           - posterior.cpp -> CONSTRUCTOR (need to set data, phi, model)
-                              (Look into "initiaizer lists")
-           - io.cpp -> fix the result location
 
   Importance Legend:
     (0) -> dependency needed

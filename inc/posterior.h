@@ -11,14 +11,15 @@
   #include "dataHandler.h"
   #include "literature.h"
   #include "vectorOverload.h"
-  
+
   using namespace std;
 
 class Posterior
 {
 public:
   // Constructor
-  Posterior(const data_t& DATA, const vector<phi_t>& PHI, const string& MODEL);
+  Posterior(const data_t& DATA, const vector<phi_t>& PHI,
+            const vector<double>& PI, const string& MODEL);
 
   // Destructor
   ~Posterior() {}
@@ -33,14 +34,15 @@ public:
 protected:
 private:
   // Attributes
-  data_t        data;
-  vector<phi_t> phi;
-  string        model;
+  data_t          data;
+  vector<phi_t>   phi;
+  vector<double>  pi;
+  string          model;
 
   // Methods
   void cumprod(const vector<int>& size,  vector<int>& k);
   vector<double> normConstraint(const vector<double>& pi);
-  vector<vector<int>> combVec (const vector<vector<int>>& X);
+  // vector<vector<int>> combVec (const vector<vector<int>>& X); Obsolete
 };
 
 #endif // POSTERIOR_H

@@ -32,9 +32,10 @@
 
 // Constructor
 Posterior::Posterior(const data_t& DATA, const vector<phi_t>& PHI,
-                       const string& MODEL) {
+                     const vector<double>& PI, const string& MODEL) {
   data = DATA;
   phi = PHI;
+  pi = PI;
   model = MODEL;
 };
 
@@ -58,14 +59,18 @@ vector<double> Posterior::bruteForce () {
   //                             pi1, ..., piK]
   // With K = k1 * ... * kN.
 
-  // int            nElMulti = 1;               // Number of elements
-  // vector<int>    sizeMulti                   // Size vector
-  // vector<int>    subMulti                    // Subscripts
-  // vector<double> phiMulti  (phi.size());     // Current shape parameters
-  // vector<double> PostMulti;                  // Storage array for the posterior
-  // vector<long double> PostMultiExp;          // Storage array for the exponent
+  int                 nElMulti = 1;        // Number of elements
+  int                 K = 1;               // Number of mixing lengths
+  vector<int>         sizeMulti;           // Global size vector
+  vector<int>         sizeK;               // K size vector
+  vector<int>         subMulti;            // Subscripts
+  vector<vector<int>> phiInd (phi.size()); // Current shape parameter indices
+  vector<int>         phiSub (phi.size()); // Current shape parameter subscripts
 
-  Literature     lit(model);
+  vector<double>      PostMulti;           // Storage array for the posterior
+  vector<long double> PostMultiExp;        // Storage array for the exponent
+
+  Literature lit(model);
 
   // Calculate Monomodal posterior elements ------------------------------------
   for (vector<int>::size_type i = 0; i < phi.size(); i++) {
@@ -73,7 +78,7 @@ vector<double> Posterior::bruteForce () {
     nElMono *= phi[i].N;
   }
 
-  PostMono.resize(nElMono, vector<double> (data.N));
+  PostMono.resize(nElMono, vector<long double> (data.N));
   PostMonoExp.resize(nElMono, vector<long double> (data.N));
 
   // Cycle over all the possible combination
@@ -108,27 +113,30 @@ vector<double> Posterior::bruteForce () {
   // Calculate Multimodal posterior --------------------------------------------
   for (vector<int>::size_type i = 0; i < phi.size(); i++) {
 
-    for (size_t k = 0; k < phi[i].K; k++) {
+    for (int k = 0; k < phi[i].K; k++) {
       // Building the size container of the PHIs.
       sizeMulti.push_back(phi[i].N);
 
       // Total number of combinations
       nElMulti *= phi[i].N;
     }
-    // Building the size containers used to extract PHIs combinations (servo).
-    Kfirst.push_back(phi[i].K);
-    Klast.push_back(phi[i].K);
+    // Building the size container of each PHI's K.
+    sizeK.push_back(phi[i].K);
 
-    // Total number of mixing lengths (Ks).
+    // Total number of modes (Ks).
     K *= phi[i].K;
   }
 
-  // Building the size container of the Ks.
-  vector<int> sizeK (K-1, phi.size());
-  sizeMulti.insert(sizeMulti.end(), sizeK.begin(), sizeK.end());
+  // Building the size container of the global indipendent Ks.
+  vector<int> sizeGlobalK (K-1, pi.size());
+  sizeMulti.insert(sizeMulti.end(), sizeGlobalK.begin(), sizeGlobalK.end());
+  subMulti.resize(sizeMulti.size());
 
   // Total number of combinations
   nElMulti *= ((K-1) * phi.size());
+
+  PostMulti.resize(nElMulti);
+  PostMultiExp.resize(nElMulti);
 
   // Cycle over all the possible combination
   for (int ind = 0; ind < nElMulti; ind++) {
@@ -137,46 +145,50 @@ vector<double> Posterior::bruteForce () {
 
     // Extract coefficeints and enforce normalization constraint
     vector<double> curr_pi (&pi[subMulti.end()[2-K]], // TEST //
-                            &pi[subMulti.end()]);
-    coeff = normConstraint(curr_pi);
+                            &pi[subMulti.end()[0]]);
+    vector<double> coeff = normConstraint(curr_pi);
 
     // Generate container for the current parameter (PHI) indices
     for (size_t i = 0; i < phi.size(); i++) {
-      int first = 0;
-      int last = 0;
-      for (size_t j = 0; j < i; j++) {
-        first += Kfirst[j];
-        last += Klast[j];
+      int phiInd_i = 0;
+      for (size_t j = 1; j < i; j++) {
+        phiInd_i += sizeK[j-1];
       }
-      PHIind[i] = vector<int> (&subMulti[first], &subMulti[last]);
-
-      // Inner Summation (k)
-      for (int k = 0; k < K; k++) {
-        int innerInd;
-        ind2sub(Klast, k,  subK);
-
-        for (size_t i = 0; i < phi.size(); i++) {
-          innerSubPhi[i] = PHIind[i][subK[i]];
-        }
-        sub2ind(sizeMono, currSubPhi,  innerInd)
-        innerSum += (PostMono[innerInd] * coeff[k]);
-      }
-
-      // Outer Summation (n) ~ Using the logarithm for numerical purpouses.
-      for (int n = 0; n < data.N; n++) {
-        PostMultiExp[ind] += log(innerSum[n]); // Eventuale divisione per log(a)
-      }
+      phiInd[i] = vector<int> (&subMulti[phiInd_i],
+                               &subMulti[phiInd_i + sizeK[i] - 1]);
     }
 
-    // Rescaling and Exponentiating
-    auto maxMulti = max_element(begin(PostMultiExp), end(PostMultiExp));
+    // Inner Summation (k)
+    vector<long double> innerSum (data.N, 0);
+    for (int k = 0; k < K; k++) {
+      int innerInd;
+      vector<int> subK (sizeK.size());
 
-    for (int ind = 0; ind < nElMulti; ind++) {
-      PostMulti[ind] = exp(PostMultiExp[ind]- *maxMulti);
+      // Selecting the Posterior element index corresponding to k
+      ind2sub(sizeK, k,  subK);
+      for (size_t i = 0; i < phi.size(); i++) {
+        phiSub[i] = phiInd[i][subK[i]];
+      }
+      sub2ind(sizeMono, phiSub,  innerInd);
+
+      // Performing the summation;
+      innerSum += (PostMono[innerInd] * coeff[k]);
     }
 
+    // Outer Summation (n) ~ Using the logarithm for numerical purpouses.
+    for (vector<double>::size_type n = 0; n < data.N; n++) {
+      PostMultiExp[ind] += log(innerSum[n]); // Eventuale divisione per log(a)
+    }
+  }
 
-  return ;
+  // Rescaling and Exponentiating
+  auto maxMulti = max_element(begin(PostMultiExp), end(PostMultiExp));
+
+  for (int ind = 0; ind < nElMulti; ind++) {
+    PostMulti[ind] = exp(PostMultiExp[ind]- *maxMulti);
+  }
+
+  return PostMulti;
 }
 
 
@@ -244,12 +256,14 @@ vector<double> Posterior::normConstraint(const vector<double>& pi) {
   // the mixing coefficient to get the K values for which:
   //                  sum(pi_star) = 1
 
-  pi.push_back(1.0);
-  vector<double> pi_star (pi.size(), 1.0);
 
-  for (size_t k = 0; k < pi.size(); k++) {
+  vector<double> pi_copy = pi;
+  vector<double> pi_star (pi_copy.size() + 1, 1.0);
+  pi_copy.push_back(1.0);
+
+  for (size_t k = 0; k < pi_copy.size(); k++) {
     for (size_t i = 0; i < k; i++) {
-      pi_star[k] *=  (i == k) ? pi[i] : (1 - pi[i]);
+      pi_star[k] *=  (i == k) ? pi_copy[i] : (1 - pi_copy[i]);
     }
   }
 
@@ -257,33 +271,33 @@ vector<double> Posterior::normConstraint(const vector<double>& pi) {
 
 }
 
-vector<vector<int>> Posterior::combVec (const vector<vector<int>>& X) {
-  // COMBVEC Create all combinations of vectors.
-  //
-  // COMBVEC takes as input a vector X containing any number of vectors, where
-  // each Xi has Ni elements and return a vector of (N1*N2*...) vectors, where
-  // the inner vectors consist of all combinations found by combining one
-  // element from each Xi.
-
-  int                 nComb = 1;        // Number of total combinations
-  int                 nVec = X.size();  // Number of vectors
-  vector<int>         size (X.size());  // Size vector
-  vector<int>         sub (X.size());   // Subscripts vector
-  vector<vector<int>> Y;                // Result
-
-  for (size_t i = 0; i < nVec; i++) {
-    nComb *= X[i].size();
-    size[i] = X[i].size();
-  }
-
-  Y.resize(nComb, vector<int> (nVec));
-  for (size_t ind = 0; ind < nComb; ind++) {
-    ind2sub(size, ind, sub);
-
-    for (size_t i = 0; i < nVec; i++) {
-      Y[ind][i] = X[i][sub[i]];
-    }
-  }
-
-  return Y;
-}
+//vector<vector<int>> Posterior::combVec (const vector<vector<int>>& X) {
+//  // COMBVEC Create all combinations of vectors.
+//  //
+//  // COMBVEC takes as input a vector X containing any number of vectors, where
+//  // each Xi has Ni elements and return a vector of (N1*N2*...) vectors, where
+//  // the inner vectors consist of all combinations found by combining one
+//  // element from each Xi.
+//
+//  int                 nComb = 1;        // Number of total combinations
+//  int                 nVec = X.size();  // Number of vectors
+//  vector<int>         size (X.size());  // Size vector
+//  vector<int>         sub (X.size());   // Subscripts vector
+//  vector<vector<int>> Y;                // Result
+//
+//  for (size_t i = 0; i < nVec; i++) {
+//    nComb *= X[i].size();
+//    size[i] = X[i].size();
+//  }
+//
+//  Y.resize(nComb, vector<int> (nVec));
+//  for (size_t ind = 0; ind < nComb; ind++) {
+//    ind2sub(size, ind, sub);
+//
+//    for (size_t i = 0; i < nVec; i++) {
+//      Y[ind][i] = X[i][sub[i]];
+//    }
+//  }
+//
+//  return Y;
+//}

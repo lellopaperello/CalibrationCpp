@@ -19,15 +19,18 @@ vector<double>::size_type nData = 10;
 
 vector<double> D = {1e-3, 1.25e-3, 1.5e-3};
 
+vector<double> pi = {0, 0.5, 1};
 
 vector<phi_t> phi = {
   {
     .name = "Phi",
     .N = 10,
+    .K = 1,
     .vec = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0}
   }, {
     .name = "dn / dv",
     .N = 10,
+    .K = 1,
     .vec = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0}
   }
 };
