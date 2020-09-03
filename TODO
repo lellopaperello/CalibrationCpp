@@ -8,6 +8,7 @@ TO DO list:
 
   (0)    - Posterior class:
   (0)      - Finish bruteForce:
+  (3)        - Add if K = 1 (Monomodal Posterior)
   (2)        - CONSTRUCTOR (need to set data, phi, model)
                (Look into "initiaizer lists")
   (3)        - Find new names for the variable of the "innerSum cycle"
@@ -29,7 +30,8 @@ TO DO list:
 
   (4)    - Test the version 1.0
            ** DEBUG **
-
+           - Implement manual maximum and minimum calculation for the Multimodal
+           - Fix the numerical conditioning of the posterior
 
   Importance Legend:
     (0) -> dependency needed

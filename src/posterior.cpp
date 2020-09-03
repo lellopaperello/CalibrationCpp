@@ -43,15 +43,20 @@ Posterior::Posterior(const data_t& DATA, const vector<phi_t>& PHI,
 vector<double> Posterior::bruteForce () {
 
   // General Declarations
+  Literature lit(model);
+  const double realmin = numeric_limits<double>::max();
+  double       base;
 
   // Declarations for the Monomodal posterior array [Mono]
   // Storage order: PostMono = [phi1, ..., phiN | nData]
-  int            nElMono = 1;               // Number of elements
-  vector<int>    sizeMono (phi.size());     // Size vector
-  vector<int>    subMono  (phi.size());     // Subscripts
-  vector<double> phiMono  (phi.size());     // Current shape parameters
-  vector<vector<long double>> PostMono;     // Storage array for the posterior
-  vector<vector<long double>> PostMonoExp;  // Storage array for the exponent
+  int                         nElMono = 1;            // Number of elements
+  vector<int>                 sizeMono (phi.size());  // Size vector
+  vector<int>                 subMono  (phi.size());  // Subscripts
+  vector<double>              phiMono  (phi.size());  // Current shape parameters
+  long double                 maxMono;                // Maximum of the posterior
+  long double                 minMono;                // Minimum of the posterior
+  vector<vector<long double>> PostMono;               // Storage array for the posterior
+  vector<vector<long double>> PostMonoExp;            // Storage array for the exponent
 
   // Declarations for the Multimodal posterior array [Multi]
   // Storage order: PostMulti = [phi1_1, ..., phi1_k1, ...,
@@ -70,16 +75,14 @@ vector<double> Posterior::bruteForce () {
   vector<double>      PostMulti;           // Storage array for the posterior
   vector<long double> PostMultiExp;        // Storage array for the exponent
 
-  Literature lit(model);
-
   // Calculate Monomodal posterior elements ------------------------------------
   for (vector<int>::size_type i = 0; i < phi.size(); i++) {
     sizeMono[i] = phi[i].N;
     nElMono *= phi[i].N;
   }
 
-  PostMono.resize(nElMono, vector<long double> (data.N));
   PostMonoExp.resize(nElMono, vector<long double> (data.N));
+  PostMono.resize(nElMono, vector<long double> (data.N));
 
   // Cycle over all the possible combination
   for (int ind = 0; ind < nElMono; ind++) {
@@ -98,15 +101,21 @@ vector<double> Posterior::bruteForce () {
                           - lit.CalculateVt(data.dv[n], phiMono))
                           / data.sigma[n]), 2 );
 
+      // Updating maximum and minimum
+      if (PostMonoExp[ind][n] > maxMono) {
+        maxMono = PostMonoExp[ind][n];
+      }else if (PostMonoExp[ind][n] < minMono) {
+        minMono = PostMonoExp[ind][n];
+      }
+
     }
   }
 
   // Rescaling and Exponentiating
-  // auto max = max_element(begin(PostMonoExp), end(PostMonoExp));
-
+  base = exp(log(realmin) / abs(maxMono - minMono));
   for (int ind = 0; ind < nElMono; ind++) {
     for (size_t n = 0; n < data.N; n++) {
-      PostMono[ind][n] = exp(PostMonoExp[ind][n]); // - *max);
+      PostMono[ind][n] = pow(base, PostMonoExp[ind][n] - maxMono);
     }
   }
 
@@ -144,22 +153,26 @@ vector<double> Posterior::bruteForce () {
     ind2sub(sizeMulti, ind,  subMulti);
 
     // Extract coefficeints and enforce normalization constraint
-    vector<double> curr_pi (&pi[subMulti.end()[2-K]], // TEST //
-                            &pi[subMulti.end()[0]]);
+    vector<double> curr_pi (K-1);
+    for (vector<int>::size_type i = subMulti.size()-K+2; i < subMulti.size(); i++) {
+      curr_pi[i] = pi[subMulti[i]];
+    }
     vector<double> coeff = normConstraint(curr_pi);
 
     // Generate container for the current parameter (PHI) indices
     for (size_t i = 0; i < phi.size(); i++) {
       int phiInd_i = 0;
-      for (size_t j = 1; j < i; j++) {
+      for (size_t j = 1; j <= i; j++) {
         phiInd_i += sizeK[j-1];
       }
-      phiInd[i] = vector<int> (&subMulti[phiInd_i],
-                               &subMulti[phiInd_i + sizeK[i] - 1]);
+
+      phiInd[i] = vector<int> (subMulti.begin() + phiInd_i,
+                               subMulti.begin() + phiInd_i + sizeK[i]);
     }
 
     // Inner Summation (k)
     vector<long double> innerSum (data.N, 0);
+    vector<long double> rhs (data.N, 0);
     for (int k = 0; k < K; k++) {
       int innerInd;
       vector<int> subK (sizeK.size());
@@ -172,7 +185,8 @@ vector<double> Posterior::bruteForce () {
       sub2ind(sizeMono, phiSub,  innerInd);
 
       // Performing the summation;
-      innerSum += (PostMono[innerInd] * coeff[k]);
+      rhs = (PostMono[innerInd] * coeff[k]);
+      innerSum = innerSum + rhs;
     }
 
     // Outer Summation (n) ~ Using the logarithm for numerical purpouses.
@@ -262,7 +276,7 @@ vector<double> Posterior::normConstraint(const vector<double>& pi) {
   pi_copy.push_back(1.0);
 
   for (size_t k = 0; k < pi_copy.size(); k++) {
-    for (size_t i = 0; i < k; i++) {
+    for (size_t i = 0; i <= k; i++) {
       pi_star[k] *=  (i == k) ? pi_copy[i] : (1 - pi_copy[i]);
     }
   }
@@ -270,6 +284,17 @@ vector<double> Posterior::normConstraint(const vector<double>& pi) {
   return pi_star;
 
 }
+
+long double Posterior::findMax(const vector<vector<long double>>& vec, int s1, int s2) {
+  vector<long double> maxVec (s2);
+  for (int ind = 0; ind < s1; ind++) {
+    maxVec[ind] = *max_element(begin(vec[ind]), end(vec[ind]));
+  }
+  auto maxMono = max_element(begin(maxVec), end(maxVec));
+
+  return *maxMono;
+}
+
 
 //vector<vector<int>> Posterior::combVec (const vector<vector<int>>& X) {
 //  // COMBVEC Create all combinations of vectors.
