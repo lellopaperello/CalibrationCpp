@@ -38,7 +38,7 @@ data.sigma.resize(data.N);
       if (testCase.sigma == 0) {
         sigmaVt = 1.0e-4;
       } else {
-        sigmaVt = testCase.sigma / 10;
+        sigmaVt = testCase.sigma;
       }
 
       // Measurement error on the Diameter

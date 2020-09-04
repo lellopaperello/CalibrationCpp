@@ -42,7 +42,7 @@ private:
 
   // Methods
   void cumprod(const vector<int>& size,  vector<int>& k);
-  vector<double> normConstraint(const vector<double>& pi);
+  void normConstraint(vector<double> pi,  vector<double>& pi_star);
   long double findMax(const vector<vector<long double>>& vec, int s1, int s2);
   // vector<vector<int>> combVec (const vector<vector<int>>& X); Obsolete
 };

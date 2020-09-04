@@ -44,8 +44,8 @@ vector<double> Posterior::bruteForce () {
 
   // General Declarations
   Literature lit(model);
-  const double realmin = numeric_limits<double>::max();
-  double       base;
+  const long double realmin = numeric_limits<long double>::min();
+  long double       base;
 
   // Declarations for the Monomodal posterior array [Mono]
   // Storage order: PostMono = [phi1, ..., phiN | nData]
@@ -53,8 +53,9 @@ vector<double> Posterior::bruteForce () {
   vector<int>                 sizeMono (phi.size());  // Size vector
   vector<int>                 subMono  (phi.size());  // Subscripts
   vector<double>              phiMono  (phi.size());  // Current shape parameters
-  long double                 maxMono;                // Maximum of the posterior
-  long double                 minMono;                // Minimum of the posterior
+
+  long double                 maxMonoExp = -1e10;     // Maximum of the posterior
+  long double                 minMonoExp = 0;         // Minimum of the posterior
   vector<vector<long double>> PostMono;               // Storage array for the posterior
   vector<vector<long double>> PostMonoExp;            // Storage array for the exponent
 
@@ -71,7 +72,11 @@ vector<double> Posterior::bruteForce () {
   vector<int>         subMulti;            // Subscripts
   vector<vector<int>> phiInd (phi.size()); // Current shape parameter indices
   vector<int>         phiSub (phi.size()); // Current shape parameter subscripts
+  vector<double>      curr_pi;             // Current indipendent mixing lengths
+  vector<double>      coeff;               // Current normalized mixing lengths
 
+  long double         maxMultiExp = -1e10; // Maximum of the posterior
+  long double         minMultiExp = 0;     // Minimum of the posterior
   vector<double>      PostMulti;           // Storage array for the posterior
   vector<long double> PostMultiExp;        // Storage array for the exponent
 
@@ -102,20 +107,19 @@ vector<double> Posterior::bruteForce () {
                           / data.sigma[n]), 2 );
 
       // Updating maximum and minimum
-      if (PostMonoExp[ind][n] > maxMono) {
-        maxMono = PostMonoExp[ind][n];
-      }else if (PostMonoExp[ind][n] < minMono) {
-        minMono = PostMonoExp[ind][n];
+      if (PostMonoExp[ind][n] > maxMonoExp) {
+        maxMonoExp = PostMonoExp[ind][n];
+      }else if (PostMonoExp[ind][n] < minMonoExp) {
+        minMonoExp = PostMonoExp[ind][n];
       }
-
     }
   }
 
   // Rescaling and Exponentiating
-  base = exp(log(realmin) / abs(maxMono - minMono));
+  base = exp(log(realmin) / (abs(maxMonoExp - minMonoExp)));
   for (int ind = 0; ind < nElMono; ind++) {
     for (size_t n = 0; n < data.N; n++) {
-      PostMono[ind][n] = pow(base, PostMonoExp[ind][n] - maxMono);
+      PostMono[ind][n] = exp(PostMonoExp[ind][n] - maxMonoExp);
     }
   }
 
@@ -144,8 +148,10 @@ vector<double> Posterior::bruteForce () {
   // Total number of combinations
   nElMulti *= ((K-1) * phi.size());
 
-  PostMulti.resize(nElMulti);
-  PostMultiExp.resize(nElMulti);
+  PostMulti.resize(nElMulti, 0);
+  PostMultiExp.resize(nElMulti, 0);
+  curr_pi.resize(K-1);
+  coeff.resize(K);
 
   // Cycle over all the possible combination
   for (int ind = 0; ind < nElMulti; ind++) {
@@ -153,11 +159,10 @@ vector<double> Posterior::bruteForce () {
     ind2sub(sizeMulti, ind,  subMulti);
 
     // Extract coefficeints and enforce normalization constraint
-    vector<double> curr_pi (K-1);
-    for (vector<int>::size_type i = subMulti.size()-K+2; i < subMulti.size(); i++) {
+    for (vector<int>::size_type i = subMulti.size()-K+1; i < subMulti.size(); i++) {
       curr_pi[i] = pi[subMulti[i]];
     }
-    vector<double> coeff = normConstraint(curr_pi);
+    normConstraint(curr_pi,  coeff);
 
     // Generate container for the current parameter (PHI) indices
     for (size_t i = 0; i < phi.size(); i++) {
@@ -191,15 +196,18 @@ vector<double> Posterior::bruteForce () {
 
     // Outer Summation (n) ~ Using the logarithm for numerical purpouses.
     for (vector<double>::size_type n = 0; n < data.N; n++) {
-      PostMultiExp[ind] += log(innerSum[n]); // Eventuale divisione per log(a)
+      PostMultiExp[ind] += (log(innerSum[n])); // / log(base));
+    }
+    // Updating maximum and minimum
+    if (PostMultiExp[ind] > maxMultiExp) {
+      maxMultiExp = PostMultiExp[ind];
+    }else if (PostMultiExp[ind] < minMultiExp) {
+      minMultiExp = PostMultiExp[ind];
     }
   }
 
-  // Rescaling and Exponentiating
-  auto maxMulti = max_element(begin(PostMultiExp), end(PostMultiExp));
-
   for (int ind = 0; ind < nElMulti; ind++) {
-    PostMulti[ind] = exp(PostMultiExp[ind]- *maxMulti);
+    PostMulti[ind] = exp(PostMultiExp[ind] - maxMultiExp);
   }
 
   return PostMulti;
@@ -258,31 +266,25 @@ void Posterior::sub2ind(const vector<int>& size, const vector<int>& sub,  int& i
 
   cumprod(size,  k);
 
-  temp = size[0];
-  for (vector<int>::size_type i = 1; i < k.size(); i++) {
-    temp += (sub[i] - 1) * k[i-1];
+  temp = sub[0];
+  for (vector<int>::size_type i = 0; i < k.size(); i++) {
+    temp += sub[i] * k[i-1];
   }
   ind = temp;
 }
 
-vector<double> Posterior::normConstraint(const vector<double>& pi) {
+void Posterior::normConstraint(vector<double> pi,  vector<double>& pi_star) {
   // Enforcing the normalization constraint on the K-1 indipendent choices of
   // the mixing coefficient to get the K values for which:
   //                  sum(pi_star) = 1
 
-
-  vector<double> pi_copy = pi;
-  vector<double> pi_star (pi_copy.size() + 1, 1.0);
-  pi_copy.push_back(1.0);
-
-  for (size_t k = 0; k < pi_copy.size(); k++) {
+  pi.push_back(1.0);
+  for (size_t k = 0; k < pi.size(); k++) {
+    pi_star[k] = 1;
     for (size_t i = 0; i <= k; i++) {
-      pi_star[k] *=  (i == k) ? pi_copy[i] : (1 - pi_copy[i]);
+      pi_star[k] *=  (i == k) ? pi[i] : (1 - pi[i]);
     }
   }
-
-  return pi_star;
-
 }
 
 long double Posterior::findMax(const vector<vector<long double>>& vec, int s1, int s2) {
