@@ -32,7 +32,8 @@ TO DO list:
            ** DEBUG **
            - Implement manual maximum and minimum calculation for the Multimodal
            - Fix the numerical conditioning of the posterior
-
+           - CHECK normConstraint
+           
   Importance Legend:
     (0) -> dependency needed
     (1) -> marginal

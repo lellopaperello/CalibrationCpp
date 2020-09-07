@@ -45,7 +45,6 @@ vector<double> Posterior::bruteForce () {
   // General Declarations
   Literature lit(model);
   const long double realmin = numeric_limits<long double>::min();
-  long double       base;
 
   // Declarations for the Monomodal posterior array [Mono]
   // Storage order: PostMono = [phi1, ..., phiN | nData]
@@ -55,30 +54,7 @@ vector<double> Posterior::bruteForce () {
   vector<double>              phiMono  (phi.size());  // Current shape parameters
 
   long double                 maxMonoExp = -1e10;     // Maximum of the posterior
-  long double                 minMonoExp = 0;         // Minimum of the posterior
-  vector<vector<long double>> PostMono;               // Storage array for the posterior
-  vector<vector<long double>> PostMonoExp;            // Storage array for the exponent
-
-  // Declarations for the Multimodal posterior array [Multi]
-  // Storage order: PostMulti = [phi1_1, ..., phi1_k1, ...,
-  //                             phiN_1, ..., phiN_kN, ...,
-  //                             pi1, ..., piK]
-  // With K = k1 * ... * kN.
-
-  int                 nElMulti = 1;        // Number of elements
-  int                 K = 1;               // Number of mixing lengths
-  vector<int>         sizeMulti;           // Global size vector
-  vector<int>         sizeK;               // K size vector
-  vector<int>         subMulti;            // Subscripts
-  vector<vector<int>> phiInd (phi.size()); // Current shape parameter indices
-  vector<int>         phiSub (phi.size()); // Current shape parameter subscripts
-  vector<double>      curr_pi;             // Current indipendent mixing lengths
-  vector<double>      coeff;               // Current normalized mixing lengths
-
-  long double         maxMultiExp = -1e10; // Maximum of the posterior
-  long double         minMultiExp = 0;     // Minimum of the posterior
-  vector<double>      PostMulti;           // Storage array for the posterior
-  vector<long double> PostMultiExp;        // Storage array for the exponent
+  long double                 minMonoExp = 1e10;      // Minimum of the posterior
 
   // Calculate Monomodal posterior elements ------------------------------------
   for (vector<int>::size_type i = 0; i < phi.size(); i++) {
@@ -86,8 +62,9 @@ vector<double> Posterior::bruteForce () {
     nElMono *= phi[i].N;
   }
 
-  PostMonoExp.resize(nElMono, vector<long double> (data.N));
-  PostMono.resize(nElMono, vector<long double> (data.N));
+  // Storage array for the Monomodal Posterior
+  vector<vector<long double>> PostMonoExp (nElMono, vector<long double> (data.N));
+  vector<vector<long double>> PostMono    (nElMono, vector<long double> (data.N));
 
   // Cycle over all the possible combination
   for (int ind = 0; ind < nElMono; ind++) {
@@ -116,16 +93,31 @@ vector<double> Posterior::bruteForce () {
   }
 
   // Rescaling and Exponentiating
-  base = exp(log(realmin) / (abs(maxMonoExp - minMonoExp)));
+  long double base = exp(log(realmin) / (abs(maxMonoExp - minMonoExp)));
   for (int ind = 0; ind < nElMono; ind++) {
     for (size_t n = 0; n < data.N; n++) {
       PostMono[ind][n] = exp(PostMonoExp[ind][n] - maxMonoExp);
     }
   }
 
+  // Declarations for the Multimodal posterior array [Multi]
+  // Storage order: PostMulti = [phi1_1, ..., phi1_k1, ...,
+  //                             phiN_1, ..., phiN_kN, ...,
+  //                             pi1, ..., piK]
+  // With K = k1 * ... * kN.
+
+  int                 nElMulti = 1;        // Number of elements
+  int                 K = 1;               // Number of mixing lengths
+  vector<int>         sizeMulti;           // Global size vector
+  vector<int>         sizeK;               // K size vector
+  vector<vector<int>> phiInd (phi.size()); // Current shape parameter indices
+  vector<int>         phiSub (phi.size()); // Current shape parameter subscripts
+
+  long double         maxMultiExp = -1e10; // Maximum of the posterior
+  long double         minMultiExp = 1e10;  // Minimum of the posterior
+
   // Calculate Multimodal posterior --------------------------------------------
   for (vector<int>::size_type i = 0; i < phi.size(); i++) {
-
     for (int k = 0; k < phi[i].K; k++) {
       // Building the size container of the PHIs.
       sizeMulti.push_back(phi[i].N);
@@ -143,15 +135,14 @@ vector<double> Posterior::bruteForce () {
   // Building the size container of the global indipendent Ks.
   vector<int> sizeGlobalK (K-1, pi.size());
   sizeMulti.insert(sizeMulti.end(), sizeGlobalK.begin(), sizeGlobalK.end());
-  subMulti.resize(sizeMulti.size());
+  vector<int> subMulti (sizeMulti.size());
 
   // Total number of combinations
   nElMulti *= ((K-1) * phi.size());
 
-  PostMulti.resize(nElMulti, 0);
-  PostMultiExp.resize(nElMulti, 0);
-  curr_pi.resize(K-1);
-  coeff.resize(K);
+  // Storage array for the Multimodal Posterior
+  vector<double>      PostMulti    (nElMulti, 0);
+  vector<long double> PostMultiExp (nElMulti, 0);
 
   // Cycle over all the possible combination
   for (int ind = 0; ind < nElMulti; ind++) {
@@ -159,9 +150,12 @@ vector<double> Posterior::bruteForce () {
     ind2sub(sizeMulti, ind,  subMulti);
 
     // Extract coefficeints and enforce normalization constraint
+    vector<double> curr_pi (K-1);
     for (vector<int>::size_type i = subMulti.size()-K+1; i < subMulti.size(); i++) {
       curr_pi[i] = pi[subMulti[i]];
     }
+
+    vector<double> coeff (K);
     normConstraint(curr_pi,  coeff);
 
     // Generate container for the current parameter (PHI) indices
@@ -177,7 +171,6 @@ vector<double> Posterior::bruteForce () {
 
     // Inner Summation (k)
     vector<long double> innerSum (data.N, 0);
-    vector<long double> rhs (data.N, 0);
     for (int k = 0; k < K; k++) {
       int innerInd;
       vector<int> subK (sizeK.size());
@@ -190,7 +183,7 @@ vector<double> Posterior::bruteForce () {
       sub2ind(sizeMono, phiSub,  innerInd);
 
       // Performing the summation;
-      rhs = (PostMono[innerInd] * coeff[k]);
+      vector<long double> rhs = (PostMono[innerInd] * coeff[k]);
       innerSum = innerSum + rhs;
     }
 
@@ -234,15 +227,16 @@ void Posterior::ind2sub(const vector<int>& size, int ind,  vector<int>& sub) {
   //   SUB = [S1, S2, ..., SN] containing the subscripts equivalent
   //   to IND for an array of size SIZE.
 
+  if (size.size() != sub.size()) {
+    throw ; // QUALCOSA
+  }
+
   vector<int> k (size.size());
-  int temp1, temp2;
-
-
   cumprod(size, k);
 
-  for (vector<int>::size_type i = k.size(); i > 0; i--) {
-    temp1 = ind % k[i-1];
-    temp2 = (ind - temp1) / k[i-1];
+  for (vector<int>::size_type i = sub.size(); i > 0; i--) {
+    int temp1 = ind % k[i-1];
+    int temp2 = (ind - temp1) / k[i-1];
 
     sub[i] = temp2;
     ind = temp1;

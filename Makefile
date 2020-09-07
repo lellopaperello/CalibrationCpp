@@ -7,7 +7,7 @@ TARGET   = calibration
 
 CC       = g++
 # compiling flags here
-CFLAGS   = -ggdb -Wall -I$(INCDIR)
+CFLAGS   = -g -ggdb -Wall -I$(INCDIR)
 
 LINKER   = g++
 # linking flags here
