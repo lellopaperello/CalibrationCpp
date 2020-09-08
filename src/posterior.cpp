@@ -136,7 +136,7 @@ vector<double> Posterior::bruteForce () {
   vector<int> subMulti (sizeMulti.size());
 
   // Total number of combinations
-  nElMulti *= ((K-1) * phi.size());
+  nElMulti *= ((K-1) * pi.size());
 
   // Storage array for the Multimodal Posterior
   vector<double>      PostMulti    (nElMulti, 0);
@@ -147,9 +147,6 @@ vector<double> Posterior::bruteForce () {
     // From linear index to subscipts
     ind2sub(sizeMulti, ind,  subMulti);
 
-if (ind == 440) {
-  cout << "qui" << '\n';
-}
     // Extract coefficeints and enforce normalization constraint
     vector<double> curr_pi;
     for (vector<int>::size_type i = subMulti.size()-K+1; i < subMulti.size(); i++) {
