@@ -41,8 +41,8 @@ private:
   string          model;
 
   // Methods
-  void cumprod(const vector<int>& size,  vector<int>& k);
-  void normConstraint(vector<double> pi,  vector<double>& pi_star);
+  vector<int> cumprod(const vector<int>& size);
+  vector<double> normConstraint(vector<double> pi);
   long double findMax(const vector<vector<long double>>& vec, int s1, int s2);
   // vector<vector<int>> combVec (const vector<vector<int>>& X); Obsolete
 };

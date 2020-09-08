@@ -106,15 +106,13 @@ vector<double> Posterior::bruteForce () {
   //                             pi1, ..., piK]
   // With K = k1 * ... * kN.
 
-  int                 nElMulti = 1;        // Number of elements
-  int                 K = 1;               // Number of mixing lengths
-  vector<int>         sizeMulti;           // Global size vector
-  vector<int>         sizeK;               // K size vector
-  vector<vector<int>> phiInd (phi.size()); // Current shape parameter indices
-  vector<int>         phiSub (phi.size()); // Current shape parameter subscripts
+  int                 nElMulti = 1;           // Number of elements
+  int                 K = 1;                  // Number of mixing lengths
+  vector<int>         sizeMulti;              // Global size vector
+  vector<int>         sizeK (phi.size());     // K size vector
 
-  long double         maxMultiExp = -1e10; // Maximum of the posterior
-  long double         minMultiExp = 1e10;  // Minimum of the posterior
+  long double         maxMultiExp = -1e10;    // Maximum of the posterior
+  long double         minMultiExp = 1e10;     // Minimum of the posterior
 
   // Calculate Multimodal posterior --------------------------------------------
   for (vector<int>::size_type i = 0; i < phi.size(); i++) {
@@ -126,7 +124,7 @@ vector<double> Posterior::bruteForce () {
       nElMulti *= phi[i].N;
     }
     // Building the size container of each PHI's K.
-    sizeK.push_back(phi[i].K);
+    sizeK[i] = phi[i].K;
 
     // Total number of modes (Ks).
     K *= phi[i].K;
@@ -149,16 +147,18 @@ vector<double> Posterior::bruteForce () {
     // From linear index to subscipts
     ind2sub(sizeMulti, ind,  subMulti);
 
+if (ind == 440) {
+  cout << "qui" << '\n';
+}
     // Extract coefficeints and enforce normalization constraint
-    vector<double> curr_pi (K-1);
+    vector<double> curr_pi;
     for (vector<int>::size_type i = subMulti.size()-K+1; i < subMulti.size(); i++) {
-      curr_pi[i] = pi[subMulti[i]];
+      curr_pi.push_back(pi[subMulti[i]]);
     }
-
-    vector<double> coeff (K);
-    normConstraint(curr_pi,  coeff);
+    vector<double> coeff = normConstraint(curr_pi);
 
     // Generate container for the current parameter (PHI) indices
+    vector<vector<int>> phiInd (phi.size());
     for (size_t i = 0; i < phi.size(); i++) {
       int phiInd_i = 0;
       for (size_t j = 1; j <= i; j++) {
@@ -172,14 +172,15 @@ vector<double> Posterior::bruteForce () {
     // Inner Summation (k)
     vector<long double> innerSum (data.N, 0);
     for (int k = 0; k < K; k++) {
-      int innerInd;
-      vector<int> subK (sizeK.size());
-
       // Selecting the Posterior element index corresponding to k
+      vector<int> subK (phi.size());
       ind2sub(sizeK, k,  subK);
+
+      vector<int> phiSub (phi.size());
       for (size_t i = 0; i < phi.size(); i++) {
         phiSub[i] = phiInd[i][subK[i]];
       }
+      int innerInd;
       sub2ind(sizeMono, phiSub,  innerInd);
 
       // Performing the summation;
@@ -207,15 +208,17 @@ vector<double> Posterior::bruteForce () {
 }
 
 
-void Posterior::cumprod(const vector<int>& size,  vector<int>& k) {
+vector<int> Posterior::cumprod(const vector<int>& size) {
   // cumprod Cumulative product
 
+  vector<int> k (size.size());
   for (vector<int>::size_type i = 0; i < size.size(); i++) {
     k[i] = 1;
     for (vector<int>::size_type j = 0; j <= i; j++) {
       k[i] *= size[j];
     }
   }
+  return k;
 }
 
 void Posterior::ind2sub(const vector<int>& size, int ind,  vector<int>& sub) {
@@ -231,10 +234,9 @@ void Posterior::ind2sub(const vector<int>& size, int ind,  vector<int>& sub) {
     throw ; // QUALCOSA
   }
 
-  vector<int> k (size.size());
-  cumprod(size, k);
+  vector<int> k = cumprod(size);
 
-  for (vector<int>::size_type i = sub.size(); i > 0; i--) {
+  for (vector<int>::size_type i = sub.size()-1; i > 0; i--) {
     int temp1 = ind % k[i-1];
     int temp2 = (ind - temp1) / k[i-1];
 
@@ -254,31 +256,30 @@ void Posterior::sub2ind(const vector<int>& size, const vector<int>& sub,  int& i
   //   the N subscripts contained in SUB = [S1, S2, ..., SN] for an
   //   array of size SIZE.
 
-  vector<int> k (size.size());
-  int         temp;
+  vector<int> k = cumprod(size);
+  int temp = sub[0];
 
-
-  cumprod(size,  k);
-
-  temp = sub[0];
   for (vector<int>::size_type i = 0; i < k.size(); i++) {
     temp += sub[i] * k[i-1];
   }
   ind = temp;
 }
 
-void Posterior::normConstraint(vector<double> pi,  vector<double>& pi_star) {
+vector<double> Posterior::normConstraint(vector<double> pi) {
   // Enforcing the normalization constraint on the K-1 indipendent choices of
   // the mixing coefficient to get the K values for which:
   //                  sum(pi_star) = 1
 
   pi.push_back(1.0);
+  vector<double> pi_star (pi.size());
+
   for (size_t k = 0; k < pi.size(); k++) {
     pi_star[k] = 1;
     for (size_t i = 0; i <= k; i++) {
       pi_star[k] *=  (i == k) ? pi[i] : (1 - pi[i]);
     }
   }
+  return pi_star;
 }
 
 long double Posterior::findMax(const vector<vector<long double>>& vec, int s1, int s2) {
