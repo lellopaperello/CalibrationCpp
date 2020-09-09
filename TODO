@@ -8,10 +8,10 @@ TO DO list:
 
   (0)    - Posterior class:
   (0)      - Finish bruteForce:
-  (3)        - Add if K = 1 (Monomodal Posterior)
+  (2)        - Fix the overload of the += operator
   (2)        - CONSTRUCTOR (need to set data, phi, model)
                (Look into "initiaizer lists")
-  (3)        - Find new names for the variable of the "innerSum cycle"
+  (2)        - Find new names for the variable of the "innerSum cycle"
   (1)      - (Implement markovChain solver)
 
   (0)    - Literature class:
@@ -23,17 +23,14 @@ TO DO list:
   (1)      - (Implement new solvers ~ Newton, chord...)
 
   (0)    - Add Data Acquisition / Generator class
-  (3)      - Test -> Test structure -> Allow multi parameter
+  (2)      - Test -> Test structure -> Implement Multimodal test cases
   (3)      - Literature
 
   (2)    - Study the error message handling in c++
 
   (4)    - Test the version 1.0
            ** DEBUG **
-           - Implement manual maximum and minimum calculation for the Multimodal
-           - Fix the numerical conditioning of the posterior
-           - CHECK normConstraint
-           
+
   Importance Legend:
     (0) -> dependency needed
     (1) -> marginal

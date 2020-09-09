@@ -23,11 +23,11 @@ struct data_t {
 };
 
 struct testCase_t {
-  string                     name;
-  string                     model;
-  vector<double> ::size_type nParam;
-  double                     mu;
-  double                     sigma;
+  string                            name;
+  string                            model;
+  vector<vector<double>>::size_type nParam;
+  vector<vector<double>>            mu;      // 1st index: Parameter
+  vector<vector<double>>            sigma;   // 2nd index: Mode
 };
 
 class DataHandler {

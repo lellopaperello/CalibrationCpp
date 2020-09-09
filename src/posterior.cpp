@@ -92,116 +92,142 @@ vector<double> Posterior::bruteForce () {
     }
   }
 
-  // Rescaling and Exponentiating
-  long double base = exp(log(realmin) / (abs(maxMonoExp - minMonoExp)));
-  for (int ind = 0; ind < nElMono; ind++) {
-    for (size_t n = 0; n < data.N; n++) {
-      PostMono[ind][n] = exp(PostMonoExp[ind][n] - maxMonoExp);
-    }
-  }
-
-  // Declarations for the Multimodal posterior array [Multi]
-  // Storage order: PostMulti = [phi1_1, ..., phi1_k1, ...,
-  //                             phiN_1, ..., phiN_kN, ...,
-  //                             pi1, ..., piK]
-  // With K = k1 * ... * kN.
-
-  int                 nElMulti = 1;           // Number of elements
-  int                 K = 1;                  // Number of mixing lengths
-  vector<int>         sizeMulti;              // Global size vector
-  vector<int>         sizeK (phi.size());     // K size vector
-
-  long double         maxMultiExp = -1e10;    // Maximum of the posterior
-  long double         minMultiExp = 1e10;     // Minimum of the posterior
-
-  // Calculate Multimodal posterior --------------------------------------------
+  /* -------------------------------------------------------------------------- */
+  // Checking the number of modes (Ks)
+  int K = 1;
   for (vector<int>::size_type i = 0; i < phi.size(); i++) {
-    for (int k = 0; k < phi[i].K; k++) {
-      // Building the size container of the PHIs.
-      sizeMulti.push_back(phi[i].N);
-
-      // Total number of combinations
-      nElMulti *= phi[i].N;
-    }
-    // Building the size container of each PHI's K.
-    sizeK[i] = phi[i].K;
-
-    // Total number of modes (Ks).
     K *= phi[i].K;
   }
 
-  // Building the size container of the global indipendent Ks.
-  vector<int> sizeGlobalK (K-1, pi.size());
-  sizeMulti.insert(sizeMulti.end(), sizeGlobalK.begin(), sizeGlobalK.end());
-  vector<int> subMulti (sizeMulti.size());
+  if (K == 1) { // Monomodal posterior
+    vector<long double> PostExp   (nElMono, 0);
+    vector<double>      Posterior (nElMono, 0);
+    long double maxExp = -1e10;
 
-  // Total number of combinations
-  nElMulti *= ((K-1) * pi.size());
-
-  // Storage array for the Multimodal Posterior
-  vector<double>      PostMulti    (nElMulti, 0);
-  vector<long double> PostMultiExp (nElMulti, 0);
-
-  // Cycle over all the possible combination
-  for (int ind = 0; ind < nElMulti; ind++) {
-    // From linear index to subscipts
-    ind2sub(sizeMulti, ind,  subMulti);
-
-    // Extract coefficeints and enforce normalization constraint
-    vector<double> curr_pi;
-    for (vector<int>::size_type i = subMulti.size()-K+1; i < subMulti.size(); i++) {
-      curr_pi.push_back(pi[subMulti[i]]);
-    }
-    vector<double> coeff = normConstraint(curr_pi);
-
-    // Generate container for the current parameter (PHI) indices
-    vector<vector<int>> phiInd (phi.size());
-    for (size_t i = 0; i < phi.size(); i++) {
-      int phiInd_i = 0;
-      for (size_t j = 1; j <= i; j++) {
-        phiInd_i += sizeK[j-1];
+    for (int ind = 0; ind < nElMono; ind++) {
+      // Summation over the data
+      for (vector<long double>::size_type n = 0; n < data.N; n++) {
+        PostExp[ind] += PostMonoExp[ind][n];
       }
-
-      phiInd[i] = vector<int> (subMulti.begin() + phiInd_i,
-                               subMulti.begin() + phiInd_i + sizeK[i]);
+      if (PostExp[ind] > maxExp) {
+        maxExp = PostExp[ind];
+      }
     }
 
-    // Inner Summation (k)
-    vector<long double> innerSum (data.N, 0);
-    for (int k = 0; k < K; k++) {
-      // Selecting the Posterior element index corresponding to k
-      vector<int> subK (phi.size());
-      ind2sub(sizeK, k,  subK);
+    // Rescaling and Exponentiating
+    for (int ind = 0; ind < nElMono; ind++) {
+      Posterior[ind] = exp(PostExp[ind] - maxExp);
+    }
 
-      vector<int> phiSub (phi.size());
+    return Posterior;
+  } else { // Multimodal posterior
+    // Rescaling and Exponentiating
+    long double base = exp(log(realmin) / (abs(maxMonoExp - minMonoExp)));
+    for (int ind = 0; ind < nElMono; ind++) {
+      for (size_t n = 0; n < data.N; n++) {
+        PostMono[ind][n] = exp(PostMonoExp[ind][n] - maxMonoExp);
+      }
+    }
+
+    // Declarations for the Multimodal posterior array [Multi]
+    // Storage order: PostMulti = [phi1_1, ..., phi1_k1, ...,
+    //                             phiN_1, ..., phiN_kN, ...,
+    //                             pi1, ..., piK]
+    // With K = k1 * ... * kN.
+
+    int                 nElMulti = 1;           // Number of elements
+    vector<int>         sizeMulti;              // Global size vector
+    vector<int>         sizeK (phi.size());     // K size vector
+
+    long double         maxMultiExp = -1e10;    // Maximum of the posterior
+    long double         minMultiExp = 1e10;     // Minimum of the posterior
+
+    // Calculate Multimodal posterior --------------------------------------------
+    for (vector<int>::size_type i = 0; i < phi.size(); i++) {
+      for (int k = 0; k < phi[i].K; k++) {
+        // Building the size container of the PHIs.
+        sizeMulti.push_back(phi[i].N);
+
+        // Total number of combinations
+        nElMulti *= phi[i].N;
+      }
+      // Building the size container of each PHI's K.
+      sizeK[i] = phi[i].K;
+    }
+
+    // Building the size container of the global indipendent Ks.
+    vector<int> sizeGlobalK (K-1, pi.size());
+    sizeMulti.insert(sizeMulti.end(), sizeGlobalK.begin(), sizeGlobalK.end());
+    vector<int> subMulti (sizeMulti.size());
+
+    // Total number of combinations
+    nElMulti *= ((K-1) * pi.size());
+
+    // Storage array for the Multimodal Posterior
+    vector<double>      PostMulti    (nElMulti, 0);
+    vector<long double> PostMultiExp (nElMulti, 0);
+
+    // Cycle over all the possible combination
+    for (int ind = 0; ind < nElMulti; ind++) {
+      // From linear index to subscipts
+      ind2sub(sizeMulti, ind,  subMulti);
+
+      // Extract coefficeints and enforce normalization constraint
+      vector<double> curr_pi;
+      for (vector<int>::size_type i = subMulti.size()-K+1; i < subMulti.size(); i++) {
+        curr_pi.push_back(pi[subMulti[i]]);
+      }
+      vector<double> coeff = normConstraint(curr_pi);
+
+      // Generate container for the current parameter (PHI) indices
+      vector<vector<int>> phiInd (phi.size());
       for (size_t i = 0; i < phi.size(); i++) {
-        phiSub[i] = phiInd[i][subK[i]];
+        int phiInd_i = 0;
+        for (size_t j = 1; j <= i; j++) {
+          phiInd_i += sizeK[j-1];
+        }
+
+        phiInd[i] = vector<int> (subMulti.begin() + phiInd_i,
+                                 subMulti.begin() + phiInd_i + sizeK[i]);
       }
-      int innerInd;
-      sub2ind(sizeMono, phiSub,  innerInd);
 
-      // Performing the summation;
-      vector<long double> rhs = (PostMono[innerInd] * coeff[k]);
-      innerSum = innerSum + rhs;
+      // Inner Summation (k)
+      vector<long double> innerSum (data.N, 0);
+      for (int k = 0; k < K; k++) {
+        // Selecting the Posterior element index corresponding to k
+        vector<int> subK (phi.size());
+        ind2sub(sizeK, k,  subK);
+
+        vector<int> phiSub (phi.size());
+        for (size_t i = 0; i < phi.size(); i++) {
+          phiSub[i] = phiInd[i][subK[i]];
+        }
+        int innerInd;
+        sub2ind(sizeMono, phiSub,  innerInd);
+
+        // Performing the summation;
+        vector<long double> rhs = (PostMono[innerInd] * coeff[k]);
+        innerSum = innerSum + rhs;
+      }
+
+      // Outer Summation (n) ~ Using the logarithm for numerical purpouses.
+      for (vector<long double>::size_type n = 0; n < data.N; n++) {
+        PostMultiExp[ind] += (log(innerSum[n])); // / log(base));
+      }
+      // Updating maximum and minimum
+      if (PostMultiExp[ind] > maxMultiExp) {
+        maxMultiExp = PostMultiExp[ind];
+      }else if (PostMultiExp[ind] < minMultiExp) {
+        minMultiExp = PostMultiExp[ind];
+      }
     }
 
-    // Outer Summation (n) ~ Using the logarithm for numerical purpouses.
-    for (vector<double>::size_type n = 0; n < data.N; n++) {
-      PostMultiExp[ind] += (log(innerSum[n])); // / log(base));
+    for (int ind = 0; ind < nElMulti; ind++) {
+      PostMulti[ind] = exp(PostMultiExp[ind] - maxMultiExp);
     }
-    // Updating maximum and minimum
-    if (PostMultiExp[ind] > maxMultiExp) {
-      maxMultiExp = PostMultiExp[ind];
-    }else if (PostMultiExp[ind] < minMultiExp) {
-      minMultiExp = PostMultiExp[ind];
-    }
+
+    return PostMulti;
   }
-
-  for (int ind = 0; ind < nElMulti; ind++) {
-    PostMulti[ind] = exp(PostMultiExp[ind] - maxMultiExp);
-  }
-
-  return PostMulti;
 }
 
 

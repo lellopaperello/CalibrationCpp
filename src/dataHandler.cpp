@@ -25,30 +25,35 @@ data.sigma.resize(data.N);
   switch (testName) {
 
     case MONOMODAL: {
-      normal_distribution<double> monomodal(testCase.mu, testCase.sigma); // Only 1 mode allowed
+      vector<normal_distribution<double>> monomodal;
+      for (vector<vector<double>>::size_type j = 0; j < testCase.nParam; j++) {
+        monomodal.push_back(normal_distribution<double>
+                           (testCase.mu[j][0], testCase.sigma[j][0]));
+      }
 
       // Generate the random PHI samples
       for (vector<double>::size_type i = 0; i < nData; i++) {
         for (vector<double>::size_type j = 0; j < testCase.nParam; j++) {
-          phi[i][j] = monomodal(generator);
+          phi[i][j] = monomodal[j](generator);
         }
       }
 
       // Measurement error on the Terminal Velocity
-      if (testCase.sigma == 0) {
+      if (testCase.sigma[0][0] == 0) {
         sigmaVt = 1.0e-4;
       } else {
-        sigmaVt = testCase.sigma;
+        sigmaVt = testCase.sigma[0][0];
       }
 
       // Measurement error on the Diameter
       sigmaD = (D.back() - D.front()) / (0.5 * D.size());
 
       data.name = "Standard Distribution";
-      data.longname = data.name + ", mu = " + to_string(testCase.mu)
-                                + ", sigma = " + to_string(testCase.sigma);
-    break;
+      data.longname = data.name + ", mu = " + to_string(testCase.mu[0][0])
+                                + ", sigma = " + to_string(testCase.sigma[0][0]);
+      break;
     }
+
 
     // No valid model selected
     default:
