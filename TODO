@@ -19,12 +19,11 @@ TO DO list:
   (1)      - (Add the interface for the solver selection)
 
   (0)    - Solver class:
-  (3)      - Add max iterations and tolerance to the bisection solver
+  (1)      - Add max iterations and tolerance to the bisection solver
   (1)      - (Implement new solvers ~ Newton, chord...)
 
   (0)    - Add Data Acquisition / Generator class
   (2)      - Test -> Test structure -> Implement Multimodal test cases
-  (3)      - Literature
 
   (2)    - Study the error message handling in c++
 

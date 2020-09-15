@@ -45,8 +45,10 @@ public:
 
 private:
 protected:
-  // Enum
-  enum testName_t { MONOMODAL, BIMODAL };
+  // Enum: Use identifiers > 10 for test cases taken from the literature
+  enum testName_t { MONOMODAL,
+                    BIMODAL,
+                    BRANDES1 = 11 };
 
   // Methods
   testName_t GetTestCase(const string& TESTCASE);

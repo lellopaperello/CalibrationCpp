@@ -9,10 +9,11 @@ data_t DataHandler::GenerateTestCase(const testCase_t testCase,
                                      const vector<double>& D) {
 
 testName_t testName = GetTestCase(testCase.name);
-Literature lit(testCase.model);
 
-vector<vector<double>> phi (nData, vector<double> (testCase.nParam));
-default_random_engine generator;
+vector<vector<double>>   phi (nData, vector<double> (testCase.nParam));
+function<double(double)> vtMean;
+double                   vtSigma;
+default_random_engine    generator;
 
 double sigmaD, sigmaVt;
 
@@ -54,6 +55,24 @@ data.sigma.resize(data.N);
       break;
     }
 
+    case BRANDES1:{
+      // Function for the mean of the Terminal Velocity
+      vtMean = [&] (double dv)
+      { // Diameter in [m]
+        return 0.87 * pow((dv*1e3), 0.23);
+      };
+
+      // Measurement error on the Terminal Velocity
+      sigmaVt = 0.01;
+
+      // Measurement error on the Diameter
+      sigmaD = (D.back() - D.front()) / (0.5 * D.size());
+
+      data.name = "Brandes -1°C";
+      data.longname = "Brandes - 2008, T = -1°C";
+
+      break;
+    }
 
     // No valid model selected
     default:
@@ -71,7 +90,13 @@ data.sigma.resize(data.N);
       data.dv[ind] = diameter(generator);
 
       // Generate terminal velocities from the selected model
-      data.vt[ind] = lit.CalculateVt(data.dv[ind], phi[j]);
+      if (testName > 10) {
+        Literature lit(testCase.model);
+        data.vt[ind] = lit.CalculateVt(data.dv[ind], phi[j]);
+      } else {
+        normal_distribution<double> velocity (vtMean(data.dv[ind]), vtSigma);
+        data.vt[ind] = velocity(generator);
+      }
 
       // Measurement error on the Terminal Velocity
       data.sigma[ind] = sigmaVt;
