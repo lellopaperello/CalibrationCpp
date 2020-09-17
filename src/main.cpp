@@ -22,7 +22,7 @@ int main(int argc, char const *argv[]) {
 
 
   // Data Analysis - Posterior generation --------------------------------------
-  Posterior   posterior(data, phi, pi, model);
+  Posterior posterior(data, phi, pi, model);
   vector<double> post = posterior.bruteForce();
 
 
