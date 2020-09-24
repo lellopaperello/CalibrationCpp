@@ -8,10 +8,30 @@ using namespace std;
 
 // Structures
 struct phi_t{
-  string  name;
-  int     N;
-  int     K;
-  double  vec[10]; // Just for hardcoded input
+  string          name;
+  string          latex;
+  int             K;
+  vector<double>  vec;
+};
+
+struct data_t {
+  string         name;
+  string         longname;
+  int            N;
+  vector<double> vt;
+  vector<double> dv;
+  vector<double> sigma;
+};
+
+struct testCase_t {
+  string                 name;
+  string                 model;
+  int                    nParam;
+  int                    nData;
+  vector<double>         D;
+  vector<double>         pi;
+  vector<vector<double>> mu;      // 1st index: Parameter
+  vector<vector<double>> sigma;   // 2nd index: Mode
 };
 
 class Settings {
@@ -25,7 +45,7 @@ public:
 
   // Data Analysis
   string         model = "InsertModelHere";
-  phi_t          phi;
+  vector<phi_t>  phi;
   vector<double> pi;
 
   // Ambient parameters

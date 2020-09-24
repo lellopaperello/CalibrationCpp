@@ -11,7 +11,7 @@ CFLAGS   = -g -ggdb -Wall -I$(INCDIR)
 
 LINKER   = g++
 # linking flags here
-LFLAGS   = -ggdb -Wall -I. -lm
+LFLAGS   = -ggdb -Wall -I. -lm -lconfig++
 
 # change these to proper directories where each file should be
 SRCDIR   = src

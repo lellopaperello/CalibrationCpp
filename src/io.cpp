@@ -2,11 +2,11 @@
 
 #include "io.h"
 
-Settings loadSettings(string configFile) {
+Settings IO::loadSettings(const char *configFile) {
   Config cfg;
   Settings settings;
 
-  // Read the file. If there is an error, report it and exit.
+  // Read the file. If there is an error, report it and exit -------------------
   try
   {
     cfg.readFile(configFile);
@@ -14,20 +14,19 @@ Settings loadSettings(string configFile) {
   catch(const FileIOException &fioex)
   {
     cerr << "I/O error while reading file." << std::endl;
-    return(EXIT_FAILURE);
   }
   catch(const ParseException &pex)
   {
     cerr << "Parse error at " << pex.getFile() << ":" << pex.getLine()
          << " - " << pex.getError() << endl;
-    return(EXIT_FAILURE);
   }
 
-  // Get the Project name.
+  // Get the Project name ------------------------------------------------------
   try
   {
-    settings.name = cfg.lookup("name");
-    cout << "Store name: " << settings.name << endl << endl;
+    string name = cfg.lookup("name");
+    cout << "Store name: " << name << endl << endl;
+    settings.name = name;
   }
   catch(const SettingNotFoundException &nfex)
   {
@@ -36,7 +35,7 @@ Settings loadSettings(string configFile) {
 
   const Setting &root = cfg.getRoot();
 
-  // Get the Data Set information.
+  // Get the Data Set information ----------------------------------------------
   try
   {
     const Setting &dataSet = root["dataSet"];
@@ -44,20 +43,239 @@ Settings loadSettings(string configFile) {
     // Data Set type
     try
     {
-      settings.type = dataSet.lookup("type")
+      string type = dataSet.lookup("type");
+      settings.type = type;
+    }
+    catch(const SettingNotFoundException &nfex)
+    {
+      cerr << "No 'dataSet type' setting in 'dataSet' section in configuration file." << endl;
     }
 
+    // Data Set generation
+    if (settings.type == "generate") {
+      dataSet.lookupValue("name", settings.testCase.name);
+
+      if (dataSet.lookupValue("model", settings.testCase.model)) {
+        dataSet.lookupValue("nParam", settings.testCase.nParam);
+
+        const Setting &muList = root["dataSet"]["mu"];
+        int muParams = muList.getLength();
+
+        for (int i = 0; i < muParams; i++) {
+          int muModes = muList[i].getLength();
+          vector<double> muParam;
+
+          for (int j = 0; j < muModes; j++) {
+            double mu = muList[i][j];
+            muParam.push_back(mu);
+          }
+          settings.testCase.mu.push_back(muParam);
+        }
+
+        const Setting &sigmaList = root["dataSet"]["sigma"];
+        int sigmaParams = sigmaList.getLength();
+
+        for (int i = 0; i < sigmaParams; i++) {
+          int sigmaModes = sigmaList[i].getLength();
+          vector<double> sigmaParam;
+
+          for (int j = 0; j < sigmaModes; j++) {
+            double sigma = sigmaList[i][j];
+            sigmaParam.push_back(sigma);
+          }
+          settings.testCase.sigma.push_back(sigmaParam);
+        }
+      }
+
+      // Get Charactieristic Diameter vector
+      try
+      {
+        const Setting &D = root["dataSet"]["D"];
+
+        bool generate;
+        if (D.lookupValue("generate", generate)
+            && generate == true) {
+
+          double first = D["vec"][0];
+          double step  = D["vec"][1];
+          double last  = D["vec"][2];
+
+          for (double value = first; value <= last; value += step) {
+            settings.testCase.D.push_back(value);
+          }
+        }
+        else
+        {
+          int count = D["vec"].getLength();
+
+          for (int i = 0; i < count; i++) {
+            double value = D["vec"][i];
+            settings.testCase.D.push_back(value);
+          }
+        }
+      }
+      catch(const SettingNotFoundException &nfex)
+      {
+        cerr << "No 'D' (diameter) setting in 'dataSet' section in configuration file." << endl;
+      }
+
+      // Get Number of Data to generate
+      try
+      {
+        int nData = dataSet.lookup("nData");
+        settings.testCase.nData = nData;
+      }
+      catch(const SettingNotFoundException &nfex)
+      {
+        cerr << "No 'nData' setting in 'dataSet' section in configuration file." << endl;
+      }
+    }
+  }
+  catch(const SettingNotFoundException &nfex)
+  {
+    cerr << "No 'dataSet' setting in configuration file." << endl;
+  }
+
+  // Get the Data Analysis information -----------------------------------------
+  try
+  {
+    const Setting &dataAnalysis = root["dataAnalysis"];
+
+    // Model selection
+    try
+    {
+      string model = dataAnalysis.lookup("model");
+      settings.model = model;
+    }
+    catch(const SettingNotFoundException &nfex)
+    {
+      cerr << "No 'model' setting in 'dataAnalysis' section in configuration file." << endl;
+    }
+
+    // Get shape parameter list
+    try
+    {
+      const Setting &phiList = dataAnalysis["phi"];
+      int nPhi = phiList.getLength();
+      settings.phi.resize(nPhi);
+
+      for (int i = 0; i < nPhi; i++) {
+        const Setting &phi = phiList[i];
+
+        // Get Name
+        try
+        {
+          string name = phi.lookup("name");
+          settings.phi[i].name = name;
+        }
+        catch(const SettingNotFoundException &nfex)
+        {
+          string name = "Phi " + to_string(i);
+          settings.phi[i].name = name;
+        }
+
+        // Get Name written in latex format (optional)
+        try
+        {
+          string latex = phi.lookup("latex");
+          settings.phi[i].latex = latex;
+        }
+        catch(const SettingNotFoundException &nfex) // Default
+        {
+          settings.phi[i].latex = settings.phi[i].name;
+        }
+
+        // Get Number of modes
+        try
+        {
+          int K = phi.lookup("K");
+          settings.phi[i].K = K;
+        }
+        catch(const SettingNotFoundException &nfex) // Default
+        {
+          settings.phi[i].K = 1;
+        }
+
+        // Get parameter vector
+        try
+        {
+          const Setting &vec = phi["vec"];
+
+          bool generate;
+          if (vec.lookupValue("generate", generate)
+              && generate == true) {
+
+            double first = vec["vec"][0];
+            double step  = vec["vec"][1];
+            double last  = vec["vec"][2];
+            for (double value = first; value <= last; value += step) {
+            settings.phi[i].vec.push_back(value);
+            }
+          }
+          else
+          {
+            int count = vec["vec"].getLength();
+
+            for (int i = 0; i < count; i++) {
+              double value = vec["vec"][i];
+              settings.phi[i].vec.push_back(value);
+            }
+          }
+        }
+        catch(const SettingNotFoundException &nfex)
+        {
+          cerr << "No 'vec' argument in 'phi' setting in 'dataAnalysis' section in configuration file." << endl;
+        }
+
+      }
+    }
+    catch(const SettingNotFoundException &nfex)
+    {
+      cerr << "No 'phi' setting in 'dataAnalysis' section in configuration file." << endl;
+    }
+
+    // Get Mixing Lenght Coefficients (optional)
+    try
+    {
+      const Setting &pi = dataAnalysis["pi"];
+
+      bool generate;
+      if (pi.lookupValue("generate", generate)
+          && generate == true) {
+
+        double first = pi["vec"][0];
+        double step  = pi["vec"][1];
+        double last  = pi["vec"][2];
+
+        for (double value = first; value <= last; value += step) {
+          settings.pi.push_back(value);
+        }
+
+      }
+      else
+      {
+        int count = pi["vec"].getLength();
+
+        for (int i = 0; i < count; i++) {
+          double value = pi["vec"][i];
+          settings.pi.push_back(value);
+        }
+      }
+    }
+    catch(const SettingNotFoundException &nfex)
+    {
+      // Ignore
+    }
+  }
+  catch(const SettingNotFoundException &nfex)
+  {
+    cerr << "No 'dataAnalysis' setting in configuration file." << endl;
+  }
 
 
 
 
-
-
-
-
-
-
-
+  return settings;
 }
 
 

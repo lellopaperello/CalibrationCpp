@@ -12,24 +12,6 @@
 
 using namespace std;
 
-// Structures
-struct data_t {
-  string                     name;
-  string                     longname;
-  vector<double> ::size_type N;
-  vector<double>             vt;
-  vector<double>             dv;
-  vector<double>             sigma;
-};
-
-struct testCase_t {
-  string                            name;
-  string                            model;
-  vector<vector<double>>::size_type nParam;
-  vector<vector<double>>            mu;      // 1st index: Parameter
-  vector<vector<double>>            sigma;   // 2nd index: Mode
-};
-
 class DataHandler {
 public:
   // Constructor

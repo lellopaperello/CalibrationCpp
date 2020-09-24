@@ -3,7 +3,6 @@
 #include "posterior.h"
 #include "dataHandler.h"
 #include "io.h"
-#include "hardInput.h"
 
 
 int main(int argc, char const *argv[]) {
