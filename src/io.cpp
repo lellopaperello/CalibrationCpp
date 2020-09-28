@@ -25,7 +25,7 @@ Settings IO::loadSettings(const char *configFile) {
   try
   {
     string name = cfg.lookup("name");
-    cout << "Store name: " << name << endl << endl;
+    cout << "Project name: " << name << endl << endl;
     settings.name = name;
   }
   catch(const SettingNotFoundException &nfex)
@@ -63,7 +63,7 @@ Settings IO::loadSettings(const char *configFile) {
 
         for (int i = 0; i < muParams; i++) {
           int muModes = muList[i].getLength();
-          vector<double> muParam;
+          vector<double> muParam (muModes);
 
           for (int j = 0; j < muModes; j++) {
             double mu = muList[i][j];
@@ -77,7 +77,7 @@ Settings IO::loadSettings(const char *configFile) {
 
         for (int i = 0; i < sigmaParams; i++) {
           int sigmaModes = sigmaList[i].getLength();
-          vector<double> sigmaParam;
+          vector<double> sigmaParam (sigmaModes);
 
           for (int j = 0; j < sigmaModes; j++) {
             double sigma = sigmaList[i][j];
@@ -107,6 +107,7 @@ Settings IO::loadSettings(const char *configFile) {
         else
         {
           int count = D["vec"].getLength();
+          settings.testCase.D.resize(count);
 
           for (int i = 0; i < count; i++) {
             double value = D["vec"][i];
@@ -208,6 +209,7 @@ Settings IO::loadSettings(const char *configFile) {
             double first = vec["vec"][0];
             double step  = vec["vec"][1];
             double last  = vec["vec"][2];
+
             for (double value = first; value <= last; value += step) {
             settings.phi[i].vec.push_back(value);
             }
@@ -215,9 +217,10 @@ Settings IO::loadSettings(const char *configFile) {
           else
           {
             int count = vec["vec"].getLength();
+            settings.phi[i].vec.resize(count);
 
-            for (int i = 0; i < count; i++) {
-              double value = vec["vec"][i];
+            for (int j = 0; j < count; j++) {
+              double value = vec["vec"][j];
               settings.phi[i].vec.push_back(value);
             }
           }
@@ -255,7 +258,8 @@ Settings IO::loadSettings(const char *configFile) {
       else
       {
         int count = pi["vec"].getLength();
-
+        settings.pi.resize(count);
+        
         for (int i = 0; i < count; i++) {
           double value = pi["vec"][i];
           settings.pi.push_back(value);

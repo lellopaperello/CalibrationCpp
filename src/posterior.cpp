@@ -58,8 +58,8 @@ vector<double> Posterior::bruteForce () {
 
   // Calculate Monomodal posterior elements ------------------------------------
   for (vector<int>::size_type i = 0; i < phi.size(); i++) {
-    sizeMono[i] = phi[i].N;
-    nElMono *= phi[i].N;
+    sizeMono[i] = phi[i].vec.size();
+    nElMono *= phi[i].vec.size();
   }
 
   // Storage array for the Monomodal Posterior
@@ -77,7 +77,7 @@ vector<double> Posterior::bruteForce () {
     }
 
     // Cycle over the data
-    for (size_t n = 0; n < data.N; n++) {
+    for (int n = 0; n < data.N; n++) {
       // Calculate only the exponent for numerical purpouses
       PostMonoExp[ind][n] = -0.5 * pow( ((data.vt[n]
                           - lit.CalculateVt(data.dv[n], phiMono))
@@ -106,7 +106,7 @@ vector<double> Posterior::bruteForce () {
 
     for (int ind = 0; ind < nElMono; ind++) {
       // Summation over the data
-      for (vector<long double>::size_type n = 0; n < data.N; n++) {
+      for (int n = 0; n < data.N; n++) {
         PostExp[ind] += PostMonoExp[ind][n];
       }
       if (PostExp[ind] > maxExp) {
@@ -124,7 +124,7 @@ vector<double> Posterior::bruteForce () {
     // Rescaling and Exponentiating
     long double base = exp(log(realmin) / (abs(maxMonoExp - minMonoExp)));
     for (int ind = 0; ind < nElMono; ind++) {
-      for (size_t n = 0; n < data.N; n++) {
+      for (int n = 0; n < data.N; n++) {
         PostMono[ind][n] = exp(PostMonoExp[ind][n] - maxMonoExp);
       }
     }
@@ -146,10 +146,10 @@ vector<double> Posterior::bruteForce () {
     for (vector<int>::size_type i = 0; i < phi.size(); i++) {
       for (int k = 0; k < phi[i].K; k++) {
         // Building the size container of the PHIs.
-        sizeMulti.push_back(phi[i].N);
+        sizeMulti.push_back(phi[i].vec.size());
 
         // Total number of combinations
-        nElMulti *= phi[i].N;
+        nElMulti *= phi[i].vec.size();
       }
       // Building the size container of each PHI's K.
       sizeK[i] = phi[i].K;
@@ -211,7 +211,7 @@ vector<double> Posterior::bruteForce () {
       }
 
       // Outer Summation (n) ~ Using the logarithm for numerical purpouses.
-      for (vector<long double>::size_type n = 0; n < data.N; n++) {
+      for (int n = 0; n < data.N; n++) {
         PostMultiExp[ind] += (log(innerSum[n])); // / log(base));
       }
       // Updating maximum and minimum

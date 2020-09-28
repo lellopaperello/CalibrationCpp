@@ -38,7 +38,6 @@ double Literature::CalculateVt(const double dv, const vector<double>& phi) {
 
   // Number of shape parameters
 
-  auto N = phi.size();
   double Ar;
   function<double(double)> equilibrium;
   function<double(double)> cD;
