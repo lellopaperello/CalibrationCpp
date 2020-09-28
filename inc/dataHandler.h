@@ -21,9 +21,7 @@ public:
   ~DataHandler() {}
 
   // Methods
-  data_t GenerateTestCase(const testCase_t testCase,
-                          const vector<double> ::size_type& nData,
-                          const vector<double>& D);
+  data_t GenerateTestCase(const testCase_t testCase);
 
 private:
 protected:

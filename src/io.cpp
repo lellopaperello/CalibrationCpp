@@ -25,7 +25,7 @@ Settings IO::loadSettings(const char *configFile) {
   try
   {
     string name = cfg.lookup("name");
-    cout << "Store name: " << name << endl << endl;
+    cout << "Project name: " << name << endl << endl;
     settings.name = name;
   }
   catch(const SettingNotFoundException &nfex)
@@ -216,8 +216,8 @@ Settings IO::loadSettings(const char *configFile) {
           {
             int count = vec["vec"].getLength();
 
-            for (int i = 0; i < count; i++) {
-              double value = vec["vec"][i];
+            for (int j = 0; j < count; j++) {
+              double value = vec["vec"][j];
               settings.phi[i].vec.push_back(value);
             }
           }

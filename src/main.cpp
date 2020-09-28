@@ -10,9 +10,12 @@ int main(int argc, char const *argv[]) {
   DataHandler dataHandler;
   IO          io;
 
+  // Loading Input Settings
+  Settings settings = io.loadSettings("test.cfg");
+
   string         postOutFIle = "res/posterior.txt";
   // Generation of an artificial dataset ---------------------------------------
-  data_t data = dataHandler.GenerateTestCase(testCase, nData, D);
+  data_t data = dataHandler.GenerateTestCase(settings.testCase);
 
 
   // Subdivision of the data set -----------------------------------------------
@@ -21,7 +24,7 @@ int main(int argc, char const *argv[]) {
 
 
   // Data Analysis - Posterior generation --------------------------------------
-  Posterior posterior(data, phi, pi, model);
+  Posterior posterior(data, settings.phi, settings.pi, settings.model);
   vector<double> post = posterior.bruteForce();
 
 
