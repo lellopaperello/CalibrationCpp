@@ -120,6 +120,7 @@ vector<double> Posterior::bruteForce () {
     }
 
     return Posterior;
+
   } else { // Multimodal posterior
     // Rescaling and Exponentiating
     long double base = exp(log(realmin) / (abs(maxMonoExp - minMonoExp)));
@@ -161,7 +162,7 @@ vector<double> Posterior::bruteForce () {
     vector<int> subMulti (sizeMulti.size());
 
     // Total number of combinations
-    nElMulti *= ((K-1) * pi.size());
+    nElMulti *= pow(pi.size(), (K-1));
 
     // Storage array for the Multimodal Posterior
     vector<double>      PostMulti    (nElMulti, 0);

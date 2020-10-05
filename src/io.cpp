@@ -67,7 +67,7 @@ Settings IO::loadSettings(const char *configFile) {
 
           for (int j = 0; j < muModes; j++) {
             double mu = muList[i][j];
-            muParam.push_back(mu);
+            muParam[j] = mu;
           }
           settings.testCase.mu.push_back(muParam);
         }
@@ -81,7 +81,7 @@ Settings IO::loadSettings(const char *configFile) {
 
           for (int j = 0; j < sigmaModes; j++) {
             double sigma = sigmaList[i][j];
-            sigmaParam.push_back(sigma);
+            sigmaParam[j] = sigma;
           }
           settings.testCase.sigma.push_back(sigmaParam);
         }
@@ -111,7 +111,7 @@ Settings IO::loadSettings(const char *configFile) {
 
           for (int i = 0; i < count; i++) {
             double value = D["vec"][i];
-            settings.testCase.D.push_back(value);
+            settings.testCase.D[i] = value;
           }
         }
       }
@@ -221,7 +221,7 @@ Settings IO::loadSettings(const char *configFile) {
 
             for (int j = 0; j < count; j++) {
               double value = vec["vec"][j];
-              settings.phi[i].vec.push_back(value);
+              settings.phi[i].vec[j] = value;
             }
           }
         }
@@ -259,10 +259,10 @@ Settings IO::loadSettings(const char *configFile) {
       {
         int count = pi["vec"].getLength();
         settings.pi.resize(count);
-        
+
         for (int i = 0; i < count; i++) {
           double value = pi["vec"][i];
-          settings.pi.push_back(value);
+          settings.pi[i] = value;
         }
       }
     }

@@ -41,12 +41,21 @@ public:
 
   // Data Set
   string type = "InsertTypeHere";
-  testCase_t testCase;
+  testCase_t testCase = {
+                          .name = "InsertNameHere",
+                          .model = "InsertModelHere",
+                          .nParam = 0,
+                          .nData = 0,
+                          .D = {},
+                          .pi = {},
+                          .mu = {},
+                          .sigma = {}
+                        };
 
   // Data Analysis
   string         model = "InsertModelHere";
-  vector<phi_t>  phi;
-  vector<double> pi;
+  vector<phi_t>  phi = {};
+  vector<double> pi = {};
 
   // Ambient parameters
   double rho_a = 1.225;
