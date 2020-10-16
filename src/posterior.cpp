@@ -44,6 +44,7 @@ vector<double> Posterior::bruteForce () {
 
   // General Declarations
   Literature lit(model);
+  IO io;
   const long double realmin = numeric_limits<long double>::min();
 
   // Declarations for the Monomodal posterior array [Mono]
@@ -66,8 +67,11 @@ vector<double> Posterior::bruteForce () {
   vector<vector<long double>> PostMonoExp (nElMono, vector<long double> (data.N));
   vector<vector<long double>> PostMono    (nElMono, vector<long double> (data.N));
 
+  int progressMono = 0;
   // Cycle over all the possible combination
   for (int ind = 0; ind < nElMono; ind++) {
+    io.printProgress(ind*100/(nElMono-1), progressMono);
+
     // From linear index to subscipts
     ind2sub(sizeMono, ind,  subMono);
 
@@ -103,6 +107,11 @@ vector<double> Posterior::bruteForce () {
     vector<long double> PostExp   (nElMono, 0);
     vector<double>      Posterior (nElMono, 0);
     long double maxExp = -1e10;
+
+    cout << "Size of the Posterior:  ";
+    io.printVec(sizeMono);
+
+    cout << "Total number of Elements:  " << nElMono << endl;
 
     for (int ind = 0; ind < nElMono; ind++) {
       // Summation over the data
@@ -143,7 +152,7 @@ vector<double> Posterior::bruteForce () {
     long double         maxMultiExp = -1e10;    // Maximum of the posterior
     long double         minMultiExp = 1e10;     // Minimum of the posterior
 
-    // Calculate Multimodal posterior --------------------------------------------
+    // Calculate Multimodal posterior ------------------------------------------
     for (vector<int>::size_type i = 0; i < phi.size(); i++) {
       for (int k = 0; k < phi[i].K; k++) {
         // Building the size container of the PHIs.
@@ -168,8 +177,16 @@ vector<double> Posterior::bruteForce () {
     vector<double>      PostMulti    (nElMulti, 0);
     vector<long double> PostMultiExp (nElMulti, 0);
 
-    // Cycle over all the possible combination
+    cout << "Size of the Posterior:  ";
+    io.printVec(sizeMulti);
+
+    cout << "Total number of Elements:  " << nElMulti << endl;
+
+    int progressMulti = 0;
+    // Cycle over a    IO io;ll the possible combination
     for (int ind = 0; ind < nElMulti; ind++) {
+      io.printProgress(ind*100/(nElMulti-1), progressMulti);
+
       // From linear index to subscipts
       ind2sub(sizeMulti, ind,  subMulti);
 
@@ -315,35 +332,3 @@ long double Posterior::findMax(const vector<vector<long double>>& vec, int s1, i
 
   return *maxMono;
 }
-
-
-//vector<vector<int>> Posterior::combVec (const vector<vector<int>>& X) {
-//  // COMBVEC Create all combinations of vectors.
-//  //
-//  // COMBVEC takes as input a vector X containing any number of vectors, where
-//  // each Xi has Ni elements and return a vector of (N1*N2*...) vectors, where
-//  // the inner vectors consist of all combinations found by combining one
-//  // element from each Xi.
-//
-//  int                 nComb = 1;        // Number of total combinations
-//  int                 nVec = X.size();  // Number of vectors
-//  vector<int>         size (X.size());  // Size vector
-//  vector<int>         sub (X.size());   // Subscripts vector
-//  vector<vector<int>> Y;                // Result
-//
-//  for (size_t i = 0; i < nVec; i++) {
-//    nComb *= X[i].size();
-//    size[i] = X[i].size();
-//  }
-//
-//  Y.resize(nComb, vector<int> (nVec));
-//  for (size_t ind = 0; ind < nComb; ind++) {
-//    ind2sub(size, ind, sub);
-//
-//    for (size_t i = 0; i < nVec; i++) {
-//      Y[ind][i] = X[i][sub[i]];
-//    }
-//  }
-//
-//  return Y;
-//}

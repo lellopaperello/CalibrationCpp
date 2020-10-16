@@ -11,9 +11,9 @@ int main(int argc, char const *argv[]) {
   IO          io;
 
   // Loading Input Settings
-  Settings settings = io.loadSettings("test.cfg");
+  Settings settings = io.loadSettings("Brandes.cfg");
 
-  string         postOutFIle = "res/posterior.txt";
+  string         postOutFIle = "res/brandes.txt";
   // Generation of an artificial dataset ---------------------------------------
   data_t data = dataHandler.GenerateTestCase(settings.testCase);
 

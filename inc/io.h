@@ -21,7 +21,8 @@ class IO
 public:
   // Methods
   Settings loadSettings(const char * configFile);
-  void printvec(const vector<int>& v);
+  void printProgress(int i, int &prog);
+  void printVec(const vector<int>& v);
   void printPosterior(const vector<double>& v, const string& file);
 };
 

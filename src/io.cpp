@@ -282,12 +282,31 @@ Settings IO::loadSettings(const char *configFile) {
   return settings;
 }
 
-
-void IO::printvec(const vector<int>& v) {
-  for (auto i : v) {
-    cout << i;
+void IO::printProgress(int i, int &prog) {
+  if (i == 0 && prog == 0) {
+    cout << "0%";
+    prog = 25;
+  } else if (i > 25 && prog == 25) {
+    cout << "----------25%";
+    prog = 50;
+  } else if (i > 50 && prog == 50) {
+    cout << "----------50%";
+    prog = 75;
+  } else if (i > 75 && prog == 75) {
+    cout << "----------75%";
+    prog = 100;
+  } else if (i == 100) {
+    cout << "----------100%" << endl;
   }
-  cout << '\n';
+}
+
+
+void IO::printVec(const vector<int>& v) {
+  cout << '{';
+  for (vector<int>::size_type i = 0; i < v.size()-1; i++) {
+    cout << v[i] << ", ";
+  }
+  cout << v.back() << "}\n";
 }
 
 

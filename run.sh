@@ -9,8 +9,8 @@ MATDIR=/home/lello/Tesi/CalibrationMatlab2/Cpp
 
 # Commands
 
-  make remove
-  make
+#  make remove
+#  make
 
   $BINDIR/*.exe
 

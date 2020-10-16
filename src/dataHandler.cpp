@@ -38,11 +38,16 @@ data.sigma.resize(data.N);
       }
 
       // Measurement error on the Terminal Velocity
-      if (testCase.sigma[0][0] == 0) {
-        errVt = 1.0e-4;
-      } else {
-        errVt = testCase.sigma[0][0];
-      }
+
+// FIX!! -----------------------------------------------------------------------
+
+//if (testCase.sigma[0][0] == 0) {
+  errVt = 1.0e-4;
+//} else {
+//  errVt = testCase.sigma[0][0];
+//}
+
+// -----------------------------------------------------------------------------
 
       // Measurement error on the Diameter
       errD = (testCase.D.back() - testCase.D.front())
@@ -115,6 +120,11 @@ DataHandler::testName_t DataHandler::GetTestCase(const string& TESTCASE) {
   if ((TESTCASE == "MONOMODAL") | (TESTCASE == "Monomodal") |
       (TESTCASE == "monomodal") | (TESTCASE == "1") | (TESTCASE == "Test 1")) {
     return MONOMODAL;
+  }
+  if ((TESTCASE == "BRANDES1") | (TESTCASE == "Brandes1") |
+      (TESTCASE == "BRANDES 1") | (TESTCASE == "Brandes 1") |
+      (TESTCASE == "brandes1") | (TESTCASE == "brandes 1")) {
+    return BRANDES1;
   }
   else if (TESTCASE == "BIMODAL") {
     return BIMODAL;
