@@ -7,7 +7,8 @@
   #include <vector>
   #include <algorithm>
   #include <limits>
-
+  #include <omp.h>
+  
   #include "io.h"
   #include "dataHandler.h"
   #include "literature.h"

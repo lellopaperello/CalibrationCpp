@@ -47,6 +47,10 @@ vector<double> Posterior::bruteForce () {
   IO io;
   const long double realmin = numeric_limits<long double>::min();
 
+  // OpenMP Declarations (Parallel)
+  int nThreads = 4;
+  omp_set_num_threads(nThreads);
+
   // Declarations for the Monomodal posterior array [Mono]
   // Storage order: PostMono = [phi1, ..., phiN | nData]
   int                         nElMono = 1;            // Number of elements
@@ -69,6 +73,7 @@ vector<double> Posterior::bruteForce () {
 
   int progressMono = 0;
   // Cycle over all the possible combination
+  #pragma omp parallel for private(progressMono)
   for (int ind = 0; ind < nElMono; ind++) {
     io.printProgress(ind*100/(nElMono-1), progressMono);
 
@@ -183,7 +188,8 @@ vector<double> Posterior::bruteForce () {
     cout << "Total number of Elements:  " << nElMulti << endl;
 
     int progressMulti = 0;
-    // Cycle over a    IO io;ll the possible combination
+    // Cycle over all the possible combination
+    #pragma omp parallel for private(progressMulti)
     for (int ind = 0; ind < nElMulti; ind++) {
       io.printProgress(ind*100/(nElMulti-1), progressMulti);
 

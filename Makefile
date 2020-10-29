@@ -7,11 +7,11 @@ TARGET   = calibration
 
 CC       = g++
 # compiling flags here
-CFLAGS   = -g -ggdb -Wall -I$(INCDIR)
+CFLAGS   = -g -fopenmp -ggdb -Wall -I$(INCDIR)
 
 LINKER   = g++
 # linking flags here
-LFLAGS   = -ggdb -Wall -I. -lm -lconfig++
+LFLAGS   = -ggdb -fopenmp -Wall -I. -lm -lconfig++
 
 # change these to proper directories where each file should be
 SRCDIR   = src
