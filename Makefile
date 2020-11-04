@@ -3,26 +3,32 @@
 # ------------------------------------------------
 
 # project name (generate executable with this name)
-TARGET   = calibration
+TARGET    = calibration
 
-CC       = g++
+CC        = g++
 # compiling flags here
-CFLAGS   = -g -fopenmp -ggdb -Wall -I$(INCDIR)
+CFLAGS    = -g -fopenmp -ggdb -Wall -I$(INCDIR) $(LIBFLAGS)
 
-LINKER   = g++
+LINKER    = g++
 # linking flags here
-LFLAGS   = -ggdb -fopenmp -Wall -I. -lm -lconfig++
+LFLAGS    = -ggdb -fopenmp -Wall -I. -lm -lconfig++ \
+            -L$(LIBDIR) -l$(LIB)
 
 # change these to proper directories where each file should be
-SRCDIR   = src
-INCDIR   = inc
-OBJDIR   = obj
-BINDIR   = bin
+SRCDIR    = src
+INCDIR    = inc
+OBJDIR    = obj
+BINDIR    = bin
 
-SOURCES  := $(wildcard $(SRCDIR)/*.cpp)
-INCLUDES := $(wildcard $(INCDIR)/*.h)
-OBJECTS  := $(SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
-rm       = rm -f
+# Library flags and folders
+LIBFLAGS  = -fpermissive -Ilib/include
+LIBDIR    = lib
+LIB       = ga
+
+SOURCES   := $(wildcard $(SRCDIR)/*.cpp)
+INCLUDES  := $(wildcard $(INCDIR)/*.h)
+OBJECTS   := $(SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
+rm        = rm -f
 
 
 $(BINDIR)/$(TARGET).exe: $(OBJECTS)
