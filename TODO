@@ -2,20 +2,22 @@ TO DO list:
   (0)    - Complete the main
 
   (0)    - i/o class:
-  (2)      - Write the parser for the INPUT ** Restore phi_t structure **
-  (2)      - Write the OUTPUT functions -> Matlab compatible
+  (2)      - Update the parser for the INPUT
+  (2)      - Update the OUTPUT functions -> Matlab compatible
   (2)      - Fix the result location
 
   (0)    - Posterior class:
   (0)      - Finish bruteForce:
   (2)        - Fix the overload of the += operator
-  (2)        - CONSTRUCTOR (need to set data, phi, model)
-               (Look into "initiaizer lists")
   (2)        - Find new names for the variable of the "innerSum cycle"
-  (1)      - (Implement markovChain solver)
+  (0)      - Implement the GA solver
+  (4)         - Write the Objective function
+  (4)         - Overload the normConstraint for float*
+  (3)         - Add the possibility to load parameter list for the GA
+  (1)      - (Implement Markov-Chain solver)
 
   (0)    - Literature class:
-  (1)      - (Add other models to the implementation ~ H&S)
+  (3)      - (Add other models to the implementation ~ H&S)
   (1)      - (Add the interface for the solver selection)
 
   (0)    - Solver class:
@@ -23,11 +25,12 @@ TO DO list:
   (1)      - (Implement new solvers ~ Newton, chord...)
 
   (0)    - Add Data Acquisition / Generator class
-  (2)      - Test -> Test structure -> Implement Multimodal test cases
+  (1)      - Test -> Test structure -> Implement Multimodal test cases
+  (3)      - Implement load data from file (Generation will be held by Matlab)
 
-  (2)    - Study the error message handling in c++
+  (1)    - Study the error message handling in c++
 
-  (4)    - Test the version 1.0
+  (0)    - Test the version 2.0
            ** DEBUG **
 
   Importance Legend:
