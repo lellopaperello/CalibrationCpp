@@ -39,6 +39,53 @@ Posterior::Posterior(const data_t& DATA, const vector<phi_t>& PHI,
   model = MODEL;
 };
 
+// Genetic Algorithm approach
+void Posterior::GeneticAlgorithm (const string& gaInputFile) {
+
+  // Creating the AlleleSet ----------------------------------------------------
+  GARealAlleleSetArray alleles;
+
+  // Create <float> input structure for the GAlib
+  int K = 1;
+  for (vector<phi_t>::size_type i = 0; i < phi.size(); i++) {
+    K *= phi[i].K;
+    vector<float> phiFloatVec (phi[i].vec.size());
+    for (auto v : phi[i].vec)
+      phiFloatVec.push_back(v);
+
+    float* phiFloatArray = phiFloatVec.data();
+
+    for (int k = 0; k < phi[i].K; k++)
+      alleles.add((int) phi[i].vec.size(), phiFloatArray);
+  }
+
+  vector<float> piFloatVec (pi.size());
+  for (auto v : pi)
+    piFloatVec.push_back(v);
+
+  float* piFloatArray = piFloatVec.data();
+
+  for (int k = 0; k < K-1; k++)
+    alleles.add((int) pi.size(), piFloatArray);
+
+
+  // Setup a default configuration for the GA (or load it from file) -----------
+  
+
+
+
+
+
+
+
+
+
+  // Run the GA
+
+  // Store the results
+}
+
+
 // Brute Force approach
 vector<double> Posterior::bruteForce () {
 
