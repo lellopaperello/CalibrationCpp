@@ -11,8 +11,7 @@ TO DO list:
   (2)        - Fix the overload of the += operator
   (2)        - Find new names for the variable of the "innerSum cycle"
   (0)      - Implement the GA solver
-  (4)         - Write the Objective function
-  (4)         - Overload the normConstraint for float*
+  (3)         - Overload the normConstraint for vector<float>
   (3)         - Add the possibility to load parameter list for the GA
   (1)      - (Implement Markov-Chain solver)
 
@@ -30,8 +29,9 @@ TO DO list:
 
   (1)    - Study the error message handling in c++
 
-  (0)    - Test the version 2.0
+  (4)    - Test the version 2.0
            ** DEBUG **
+           - Tune the GA parameters
 
   Importance Legend:
     (0) -> dependency needed

@@ -7,7 +7,7 @@ TARGET    = calibration
 
 CC        = g++
 # compiling flags here
-CFLAGS    = -g -fopenmp -ggdb -Wall -I$(INCDIR) $(LIBFLAGS)
+CFLAGS    = -g -fopenmp -ggdb -w -Wall -I$(INCDIR) $(LIBFLAGS)
 
 LINKER    = g++
 # linking flags here

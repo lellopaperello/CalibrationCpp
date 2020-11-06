@@ -29,6 +29,7 @@
 // -----------------------------------------------------------------------------
 
 #include "posterior.h"
+#include <ga/GARealGenome.C>
 
 // Constructor
 Posterior::Posterior(const data_t& DATA, const vector<phi_t>& PHI,
@@ -39,17 +40,20 @@ Posterior::Posterior(const data_t& DATA, const vector<phi_t>& PHI,
   model = MODEL;
 };
 
-// Genetic Algorithm approach
-void Posterior::GeneticAlgorithm (const string& gaInputFile) {
+// Genetic Algorithm approach --------------------------------------------------
+void Posterior::GeneticAlgorithm (const string& gaInputFile = "none") {
 
   // Creating the AlleleSet ----------------------------------------------------
   GARealAlleleSetArray alleles;
 
   // Create <float> input structure for the GAlib
   int K = 1;
+  vector<int> Kvec;
   for (vector<phi_t>::size_type i = 0; i < phi.size(); i++) {
     K *= phi[i].K;
-    vector<float> phiFloatVec (phi[i].vec.size());
+    Kvec.push_back(phi[i].K);
+
+    vector<float> phiFloatVec;
     for (auto v : phi[i].vec)
       phiFloatVec.push_back(v);
 
@@ -68,25 +72,86 @@ void Posterior::GeneticAlgorithm (const string& gaInputFile) {
   for (int k = 0; k < K-1; k++)
     alleles.add((int) pi.size(), piFloatArray);
 
+  // Creating the userData structure (Every parameter that the function needs
+  // to know since it's static)
+  userData_t UD = {
+    .data  = data,
+    .K     = K,
+    .Kvec  = Kvec,
+    .model = model
+  };
+
+  GARealGenome genome(alleles, Objective, (void *) &UD);
+
 
   // Setup a default configuration for the GA (or load it from file) -----------
-  
-
-
-
-
-
-
-
-
+  GAParameterList params;
+  GASteadyStateGA::registerDefaultParameters(params);
 
   // Run the GA
+  GASteadyStateGA ga(genome);
+  GANoScaling scaling;
+  ga.parameters(params);
+  ga.scaling(scaling);
+  ga.evolve();
 
-  // Store the results
+  // Print the results
+  cout << "GA Results:\n" << ga.statistics().bestIndividual() << '\n';
+}
+
+// Objective function for the GA ( log(Posterior([Phi, pi])) )
+float Posterior::Objective (GAGenome& g) {
+  // Cast the genome to let the GAGenome acquire all the members of the
+  // GARealGenome
+  GARealGenome& genome = (GARealGenome&)g;
+
+  // And the data provided by the user
+  userData_t* _UD    = (userData_t*)  g.userData();
+
+  // General Declarations
+  Literature lit(_UD->model);
+  double posterior = 0.0;
+
+
+  // Extract coefficeints and enforce normalization constraint
+  vector<double> curr_pi (_UD->K-1);
+  for (int i = genome.length()-_UD->K+1; i < genome.length(); i++) {
+        curr_pi.push_back((double) genome.gene(i));
+  }
+  vector<double> coeff = normConstraint(curr_pi);
+
+
+  // Outer Summation (n) ~ Using the logarithm for numerical purpouses.
+  for (int n = 0; n < _UD->data.N; n++) {
+
+    // Inner Summation (k)
+    double innerSum = 0.0;
+    for (size_t k = 0; k < _UD->K; k++) {
+      vector<int> subK (_UD->Kvec.size());
+      ind2sub(_UD->Kvec, k,  subK);
+
+      // Extract phiK
+      vector<double> phiK (_UD->Kvec.size());
+      int offset = 0;
+      for (size_t i = 0; i < _UD->Kvec.size(); i++) {
+        phiK[i] = genome.gene(offset + subK[i]);
+        offset += _UD->Kvec[i];
+      }
+
+      innerSum += genome.gene(offset + k)
+                * exp(-0.5 * pow( ((_UD->data.vt[n]
+                      - lit.CalculateVt(_UD->data.dv[n], phiK))
+                      / _UD->data.sigma[n]), 2 ));
+    }
+    posterior += log(innerSum);
+  }
+
+  return (float) posterior;
 }
 
 
-// Brute Force approach
+
+// Brute Force approach --------------------------------------------------------
 vector<double> Posterior::bruteForce () {
 
   // General Declarations

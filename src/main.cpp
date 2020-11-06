@@ -10,9 +10,9 @@ int main(int argc, char const *argv[]) {
   IO          io;
 
   // Loading Input Settings
-  Settings settings = io.loadSettings("Brandes.cfg");
+  Settings settings = io.loadSettings("test.cfg");
 
-  string         postOutFIle = "res/brandes.txt";
+  string postOutFIle = "res/brandes.txt";
   // Generation of an artificial dataset ---------------------------------------
   data_t data = dataHandler.GenerateTestCase(settings.testCase);
 
@@ -24,11 +24,11 @@ int main(int argc, char const *argv[]) {
 
   // Data Analysis - Posterior generation --------------------------------------
   Posterior posterior(data, settings.phi, settings.pi, settings.model);
-  vector<double> post = posterior.bruteForce();
-
+  //vector<double> post = posterior.bruteForce();
+  posterior.GeneticAlgorithm();
 
   // Saving results
-  io.printPosterior(post, postOutFIle);
+  // io.printPosterior(post, postOutFIle);
 
   return 0;
 }

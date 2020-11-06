@@ -8,11 +8,16 @@
   #include <algorithm>
   #include <limits>
   #include <omp.h>
-  
+
   #include "io.h"
   #include "dataHandler.h"
   #include "literature.h"
   #include "vectorOverload.h"
+
+  #include "ga/ga.h"
+  #include <ga/std_stream.h>
+  #include <ga/GARealGenome.h>
+
 
   using namespace std;
 
@@ -28,12 +33,21 @@ public:
 
   // Methods
   vector<double> bruteForce ();
+  void GeneticAlgorithm (const string& gaInputFile = "none");
 
   // Useful functions
-  void ind2sub(const vector<int>& size, int ind,  vector<int>& sub);
-  void sub2ind(const vector<int>& size, const vector<int>& sub,  int& ind);
+  static void ind2sub(const vector<int>& size, int ind,  vector<int>& sub);
+  static void sub2ind(const vector<int>& size, const vector<int>& sub,  int& ind);
 
 protected:
+  // Structure
+  struct userData_t {
+    data_t       data;
+    int          K;
+    vector<int>  Kvec;
+    string       model;
+  };
+
 private:
   // Attributes
   data_t          data;
@@ -42,9 +56,11 @@ private:
   string          model;
 
   // Methods
-  vector<int> cumprod(const vector<int>& size);
-  vector<double> normConstraint(vector<double> pi);
+  static vector<int> cumprod(const vector<int>& size);
+  static vector<double> normConstraint(vector<double> pi);
   long double findMax(const vector<vector<long double>>& vec, int s1, int s2);
+
+  static float Objective (GAGenome &);
 };
 
 #endif // POSTERIOR_H
