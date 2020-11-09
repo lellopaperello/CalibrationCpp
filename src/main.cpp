@@ -10,12 +10,12 @@ int main(int argc, char const *argv[]) {
   IO          io;
 
   // Loading Input Settings
-  Settings settings = io.loadSettings("test.cfg");
+  Settings settings = io.loadSettings("Validation.cfg");
 
   string postOutFIle = "res/brandes.txt";
   // Generation of an artificial dataset ---------------------------------------
-  data_t data = dataHandler.GenerateTestCase(settings.testCase);
-
+  // data_t data = dataHandler.GenerateTestCase(settings.testCase);
+  data_t data = dataHandler.LoadData("dataset.dat", false);
 
   // Subdivision of the data set -----------------------------------------------
 
@@ -24,11 +24,11 @@ int main(int argc, char const *argv[]) {
 
   // Data Analysis - Posterior generation --------------------------------------
   Posterior posterior(data, settings.phi, settings.pi, settings.model);
-  //vector<double> post = posterior.bruteForce();
-  posterior.GeneticAlgorithm();
+  vector<double> post = posterior.bruteForce();
+  // posterior.GeneticAlgorithm();
 
   // Saving results
-  // io.printPosterior(post, postOutFIle);
+  io.printPosterior(post, postOutFIle);
 
   return 0;
 }

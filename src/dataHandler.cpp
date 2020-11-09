@@ -4,22 +4,51 @@
 
 #include "dataHandler.h"
 
+data_t DataHandler::LoadData(const string& dataFile, bool printData) {
+  ifstream file (dataFile);
+  data_t data;
+
+  getline(file, data.name);
+  getline(file, data.longname);
+  file >> data.N;
+
+  data.dv.resize(data.N);
+  data.vt.resize(data.N);
+  data.sigma.resize(data.N);
+  for (int i = 0; i < data.N; i++) {
+    file >> data.dv[i];
+    file >> data.vt[i];
+    file >> data.sigma[i];
+  }
+
+  if (printData) {
+    for (int i = 0; i < data.N; i++) {
+      cout << data.dv[i] << ' ';
+      cout << data.vt[i] << ' ';
+      cout << data.sigma[i] << '\n';
+    }
+  }
+
+  return data;
+}
+
+
 data_t DataHandler::GenerateTestCase(const testCase_t testCase) {
 
-testName_t testName = GetTestCase(testCase.name);
+  testName_t testName = GetTestCase(testCase.name);
 
-vector<vector<double>>   phi (testCase.nData, vector<double> (testCase.nParam));
-function<double(double)> vtMean;
-double                   vtSigma;
-default_random_engine    generator;
+  vector<vector<double>>   phi (testCase.nData, vector<double> (testCase.nParam));
+  function<double(double)> vtMean;
+  double                   vtSigma;
+  default_random_engine    generator;
 
-double errD, errVt;
+  double errD, errVt;
 
-data_t data;
-data.N = testCase.nData * testCase.D.size();
-data.dv.resize(data.N);
-data.vt.resize(data.N);
-data.sigma.resize(data.N);
+  data_t data;
+  data.N = testCase.nData * testCase.D.size();
+  data.dv.resize(data.N);
+  data.vt.resize(data.N);
+  data.sigma.resize(data.N);
 
   switch (testName) {
 

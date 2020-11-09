@@ -22,6 +22,7 @@ public:
 
   // Methods
   data_t GenerateTestCase(const testCase_t testCase);
+  data_t LoadData(const string& dataFile, bool printData);
 
 private:
 protected:
