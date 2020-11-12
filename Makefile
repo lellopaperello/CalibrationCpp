@@ -11,8 +11,8 @@ CFLAGS    = -g -fopenmp -ggdb -w -Wall -I$(INCDIR) $(LIBFLAGS)
 
 LINKER    = g++
 # linking flags here
-LFLAGS    = -ggdb -fopenmp -Wall -I. -lm -lconfig++ \
-            -L$(LIBDIR) -l$(LIB)
+LFLAGS    = -ggdb -fopenmp -Wall -I. -lm \
+            -L$(LIBDIR) $(LIB)
 
 # change these to proper directories where each file should be
 SRCDIR    = src
@@ -21,9 +21,9 @@ OBJDIR    = obj
 BINDIR    = bin
 
 # Library flags and folders
-LIBFLAGS  = -fpermissive -Ilib/include
-LIBDIR    = lib
-LIB       = ga
+LIBFLAGS  = -fpermissive -Istatic_lib/include
+LIBDIR    = static_lib/lib
+LIB       = -lga -lconfig++
 
 SOURCES   := $(wildcard $(SRCDIR)/*.cpp)
 INCLUDES  := $(wildcard $(INCDIR)/*.h)

@@ -160,7 +160,7 @@ vector<double> Posterior::bruteForce () {
   const long double realmin = numeric_limits<long double>::min();
 
   // OpenMP Declarations (Parallel)
-  int nThreads = 4;
+  int nThreads = 1;
   omp_set_num_threads(nThreads);
 
   // Declarations for the Monomodal posterior array [Mono]

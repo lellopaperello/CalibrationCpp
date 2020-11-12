@@ -5,7 +5,7 @@
 HOMEDIR=$PWD
 BINDIR=$HOMEDIR/bin
 RESDIR=$HOMEDIR/res
-MATDIR=/home/lello/Tesi/CalibrationMatlab2/Cpp
+MATDIR=/home/lello/Tesi/CalibrationMatlab2/Cpp/validation
 
 # Commands
 

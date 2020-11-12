@@ -12,7 +12,7 @@ int main(int argc, char const *argv[]) {
   // Loading Input Settings
   Settings settings = io.loadSettings("Validation.cfg");
 
-  string postOutFIle = "res/brandes.txt";
+  string postOutFIle = "res/validation.txt";
   // Generation of an artificial dataset ---------------------------------------
   // data_t data = dataHandler.GenerateTestCase(settings.testCase);
   data_t data = dataHandler.LoadData("dataset.dat", false);
