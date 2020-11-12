@@ -31,4 +31,6 @@
 ###################
 bozze/
 res/
-lib/include
+static_lib/include
+static_lib/lib
+static_lib/share
