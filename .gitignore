@@ -22,6 +22,7 @@
 *.log
 *.vtk
 *.msh
+*.status
 
 # Temporary files #
 ###################
@@ -29,6 +30,7 @@
 
 # Ignored Folders #
 ###################
+config/
 bozze/
 res/
 static_lib/include

@@ -88,11 +88,27 @@ void Posterior::GeneticAlgorithm (const string& gaInputFile = "none") {
   GAParameterList params;
   GASteadyStateGA::registerDefaultParameters(params);
 
-  // Run the GA
+  // Read params from file
+  params.read("config/gaSettings.txt");
+
+  // Output the params to check them.
+  params.write("config/gaSettings.out");
+
+  // Run the GA ----------------------------------------------------------------
   GASteadyStateGA ga(genome);
-  GANoScaling scaling;
+
+  // Set the general parameters from the file
   ga.parameters(params);
+
+  // Set the scaling of the fitness function
+  GANoScaling scaling;
   ga.scaling(scaling);
+
+  // Set the Selection Scheme
+  // GATournamentSelector selector;
+  // ga.selector(selector);
+
+  // Let the GA evolve
   ga.evolve();
 
   // Print the results

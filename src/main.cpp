@@ -10,25 +10,21 @@ int main(int argc, char const *argv[]) {
   IO          io;
 
   // Loading Input Settings
-  Settings settings = io.loadSettings("Validation.cfg");
+  Settings settings = io.loadSettings("config/gaTest.cfg");
 
-  string postOutFIle = "res/validation.txt";
-  // Generation of an artificial dataset ---------------------------------------
-  // data_t data = dataHandler.GenerateTestCase(settings.testCase);
-  data_t data = dataHandler.LoadData("dataset.dat", false);
-
-  // Subdivision of the data set -----------------------------------------------
-
-  /*   TO BE IMPLEMENTED   */
+  // string postOutFIle = "res/validation.txt";
+  // Generation / Loading of an artificial dataset -----------------------------
+  data_t data = dataHandler.GenerateTestCase(settings.testCase);
+  // data_t data = dataHandler.LoadData("config/dataset.dat", false);
 
 
   // Data Analysis - Posterior generation --------------------------------------
-  Posterior posterior(data, settings.phi, settings.pi, settings.model);
-  vector<double> post = posterior.bruteForce();
-  // posterior.GeneticAlgorithm();
+  // Posterior posterior(data, settings.phi, settings.pi, settings.model);
+  // vector<double> post = posterior.bruteForce();
+  posterior.GeneticAlgorithm();
 
   // Saving results
-  io.printPosterior(post, postOutFIle);
+  // io.printPosterior(post, postOutFIle);
 
   return 0;
 }

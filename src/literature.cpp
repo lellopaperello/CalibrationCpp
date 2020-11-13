@@ -24,7 +24,9 @@ Literature::model_t Literature::GetModel(const string& MODEL) {
   if ((MODEL == "Ganser") | (MODEL == "ganser") | (MODEL == "GANSER")) {
     return GANSER;
   }
-  else if (MODEL == "H&S") {
+  else if ((MODEL == "H&S") | (MODEL == "HOLTZERSOMMERFELD") |
+           (MODEL == "Holtzer&Sommerfeld") | (MODEL == "HOLTZER&SOMMERFELD")  |
+           (MODEL == "HoltzerAndSommerfeld") | (MODEL == "HOLTZERANDSOMMERFELD")) {
     return HOLTZERSOMMERFELD;
   }
   else {
@@ -37,7 +39,6 @@ Literature::model_t Literature::GetModel(const string& MODEL) {
 double Literature::CalculateVt(const double dv, const vector<double>& phi) {
 
   // Number of shape parameters
-
   double Ar;
   function<double(double)> equilibrium;
   function<double(double)> cD;
@@ -74,6 +75,33 @@ double Literature::CalculateVt(const double dv, const vector<double>& phi) {
       {
         return K2* (24 / (RE_v*v) * (1 + 0.1118 * pow(RE_v*v, 0.6567))
                  + 0.4305 / (1 + 3305 / (RE_v*v)));
+      };
+
+      break;
+    }
+
+    case HOLTZERSOMMERFELD: {
+      if (phi.size() != 2) {
+        cout << "Holtzer&Sommerfeld model requirest 2 parameters!" << '\n';
+      }
+      double Phi, Phi_p, Re_v;
+
+      // Indipendent shape parameters for Ganser's model
+      Phi = phi[0];     Phi_p = phi[1];
+
+      // Aspect ratio ~ V / S
+      Ar = 2/(double)3 * dv * Phi_p;
+
+      // Reynolds number per unit velocity
+      Re_v = rho_a * dv / mu;
+
+      // Drag coefficient model
+      cD = [&](double v)
+      {
+        return 8.0  / (Re_v*v * sqrt(Phi_p)) +
+               16.0 / (Re_v*v * sqrt(Phi)) +
+               3.0  / (sqrt(Re_v*v) * pow(Phi, 0.75)) +
+               pow(0.421, 0.4 * pow(-log(Phi), 0.2) ) / Phi_p;
       };
 
       break;
