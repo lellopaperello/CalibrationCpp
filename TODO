@@ -11,8 +11,7 @@ TO DO list:
   (2)        - Fix the overload of the += operator
   (2)        - Find new names for the variable of the "innerSum cycle"
   (0)      - Implement the GA solver
-  (3)         - Overload the normConstraint for vector<float>
-  (3)         - Add the possibility to load parameter list for the GA
+  (4)         - Derive a Genome for <double> and/or <long double>
   (1)      - (Implement Markov-Chain solver)
 
   (0)    - Literature class:
