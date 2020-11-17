@@ -46,6 +46,7 @@ protected:
     int          K;
     vector<int>  Kvec;
     string       model;
+    double       base;
   };
 
 private:
@@ -61,6 +62,7 @@ private:
   long double findMax(const vector<vector<long double>>& vec, int s1, int s2);
 
   static float Objective (GAGenome &);
+  static float Objective2 (GAGenome &);
 };
 
 #endif // POSTERIOR_H

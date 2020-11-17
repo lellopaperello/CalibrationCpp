@@ -42,6 +42,81 @@ Posterior::Posterior(const data_t& DATA, const vector<phi_t>& PHI,
 
 // Genetic Algorithm approach --------------------------------------------------
 void Posterior::GeneticAlgorithm (const string& gaInputFile = "none") {
+  // Monomodal brute force approach to asses the limits of the Posterior
+  // General Declarations
+  const long double realmin = numeric_limits<double>::min();
+cout << "realmin = " << realmin << '\n';
+  Literature lit(model);
+
+  // OpenMP Declarations (Parallel)
+  // int nThreads = 1;
+  // omp_set_num_threads(nThreads);
+
+  // Declarations for the Monomodal posterior array [Mono]
+  // Storage order: PostMono = [phi1, ..., phiN | nData]
+  int                         nElMono = 1;            // Number of elements
+  vector<int>                 sizeMono (phi.size());  // Size vector
+  vector<int>                 subMono  (phi.size());  // Subscripts
+  vector<double>              phiMono  (phi.size());  // Current shape parameters
+
+  long double                 maxMonoExp = -1e10;     // Maximum of the posterior
+  long double                 minMonoExp = 1e10;      // Minimum of the posterior
+
+  // Calculate Monomodal posterior elements ------------------------------------
+  for (vector<int>::size_type i = 0; i < phi.size(); i++) {
+    sizeMono[i] = phi[i].vec.size();
+    nElMono *= phi[i].vec.size();
+  }
+
+  // Storage array for the Monomodal Posterior
+  vector<vector<long double>> PostMonoExp (nElMono, vector<long double> (data.N));
+  // vector<vector<long double>> PostMono    (nElMono, vector<long double> (data.N));
+
+  // Cycle over all the possible combination
+  cout << "Calculating monomodal posterior..\n";
+
+  for (int ind = 0; ind < nElMono; ind++) {
+    // From linear index to subscipts
+    ind2sub(sizeMono, ind,  subMono);
+
+    // Creating the current combination of values
+    for (vector<int>::size_type j = 0; j < phi.size(); j++) {
+      phiMono[j] = phi[j].vec[subMono[j]];
+    }
+
+    // Cycle over the data
+    for (int n = 0; n < data.N; n++) {
+      // Calculate only the exponent for numerical purpouses
+      PostMonoExp[ind][n] = -0.5 * pow( ((data.vt[n]
+                          - lit.CalculateVt(data.dv[n], phiMono))
+                          / data.sigma[n]), 2 );
+
+      // Updating maximum and minimum
+      if (PostMonoExp[ind][n] > maxMonoExp) {
+        maxMonoExp = PostMonoExp[ind][n];
+      }else if (PostMonoExp[ind][n] < minMonoExp) {
+        minMonoExp = PostMonoExp[ind][n];
+      }
+    }
+  }
+
+  double base = pow(realmin, -1.0/abs(minMonoExp));
+  // double baseData = pow((double) data.N, 1.0/abs(minMonoExp))
+  //                 / pow(realmin, 1.0/abs(minMonoExp));
+  // double baseMax = pow(realmin, -1.0/abs(maxMonoExp - minMonoExp));
+  // double baseMaxData = pow(realmin, -1.0/abs(maxMonoExp - minMonoExp))
+  //                    / pow((double) data.N, -1.0/abs(maxMonoExp - minMonoExp));
+  //
+
+  cout << "Calculation finished. Posterior Limits:\n"
+       << "Posterior maximum = " << maxMonoExp << '\n'
+       << "Posterior minimum = " << minMonoExp << '\n'
+       << "Rescaling the posterior. The new base will be b = " << base << '\n';
+
+// cout << "log(base) = " << log(base) << '\n';
+// cout << "baseData = " << baseData << '\n'
+//      << "baseMax = " << baseMax << '\n'
+//      << "baseMaxData = " << baseMaxData << '\n';
 
   // Creating the AlleleSet ----------------------------------------------------
   GARealAlleleSetArray alleles;
@@ -78,10 +153,11 @@ void Posterior::GeneticAlgorithm (const string& gaInputFile = "none") {
     .data  = data,
     .K     = K,
     .Kvec  = Kvec,
-    .model = model
+    .model = model,
+    .base = base
   };
 
-  GARealGenome genome(alleles, Objective, (void *) &UD);
+  GARealGenome genome(alleles, Objective, (void* ) &UD);
 
 
   // Setup a default configuration for the GA (or load it from file) -----------
@@ -104,15 +180,38 @@ void Posterior::GeneticAlgorithm (const string& gaInputFile = "none") {
   GANoScaling scaling;
   ga.scaling(scaling);
 
+  // Set the terminator: Stop the GA when the generations converge
+  ga.terminator(GAGeneticAlgorithm::TerminateUponConvergence);
+  
   // Set the Selection Scheme
   // GATournamentSelector selector;
   // ga.selector(selector);
 
   // Let the GA evolve
+  cout << "\nRunning the GA..\n";
   ga.evolve();
 
   // Print the results
   cout << "GA Results:\n" << ga.statistics().bestIndividual() << '\n';
+}
+
+float Posterior::Objective2 (GAGenome& g) {
+  // Cast the genome to let the GAGenome acquire all the members of the
+  // GARealGenome
+  GARealGenome& genome = (GARealGenome&)g;
+
+  // And the data provided by the user
+  // userData_t* _UD    = (userData_t*)  g.userData();
+
+  // General Declarations
+  float posterior = 0.0;
+
+  for(int i=0; i<genome.length(); i++){
+    posterior += pow(genome.gene(i), 2);
+    cout << genome.gene(i) << " " << pow(genome.gene(i), 2) << " ";
+  }
+cout << posterior << '\n';
+  return -posterior;
 }
 
 // Objective function for the GA ( log(Posterior([Phi, pi])) )
@@ -126,7 +225,7 @@ float Posterior::Objective (GAGenome& g) {
 
   // General Declarations
   Literature lit(_UD->model);
-  double posterior = 0.0;
+  long double posterior = 0.0;
 
 
   // Extract coefficeints and enforce normalization constraint
@@ -141,7 +240,7 @@ float Posterior::Objective (GAGenome& g) {
   for (int n = 0; n < _UD->data.N; n++) {
 
     // Inner Summation (k)
-    double innerSum = 0.0;
+    long double innerSum = 0.0;
     for (size_t k = 0; k < _UD->K; k++) {
       vector<int> subK (_UD->Kvec.size());
       ind2sub(_UD->Kvec, k,  subK);
@@ -154,14 +253,15 @@ float Posterior::Objective (GAGenome& g) {
         offset += _UD->Kvec[i];
       }
 
-      innerSum += genome.gene(offset + k)
-                * exp(-0.5 * pow( ((_UD->data.vt[n]
-                      - lit.CalculateVt(_UD->data.dv[n], phiK))
-                      / _UD->data.sigma[n]), 2 ));
+      innerSum += (long double) coeff[k]
+                * pow(_UD->base, -0.5 * pow( ((_UD->data.vt[n]
+                                      - lit.CalculateVt(_UD->data.dv[n], phiK))
+                                      / _UD->data.sigma[n]), 2 ));
     }
-    posterior += log(innerSum);
+    posterior += log(innerSum) / log(_UD->base);
+    // cout << "innerSum" << log(innerSum) << '\n';
   }
-
+// cout << "posterior = " << posterior << '\n';
   return (float) posterior;
 }
 
@@ -229,7 +329,7 @@ vector<double> Posterior::bruteForce () {
     }
   }
 
-  /* -------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------- */
   // Checking the number of modes (Ks)
   int K = 1;
   for (vector<int>::size_type i = 0; i < phi.size(); i++) {
