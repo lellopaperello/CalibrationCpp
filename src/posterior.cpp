@@ -182,7 +182,7 @@ cout << "realmin = " << realmin << '\n';
 
   // Set the terminator: Stop the GA when the generations converge
   ga.terminator(GAGeneticAlgorithm::TerminateUponConvergence);
-  
+
   // Set the Selection Scheme
   // GATournamentSelector selector;
   // ga.selector(selector);
@@ -193,6 +193,7 @@ cout << "realmin = " << realmin << '\n';
 
   // Print the results
   cout << "GA Results:\n" << ga.statistics().bestIndividual() << '\n';
+
 }
 
 float Posterior::Objective2 (GAGenome& g) {
@@ -262,7 +263,7 @@ float Posterior::Objective (GAGenome& g) {
     // cout << "innerSum" << log(innerSum) << '\n';
   }
 // cout << "posterior = " << posterior << '\n';
-  return (float) posterior;
+  return (float) -posterior;
 }
 
 

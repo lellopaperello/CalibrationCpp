@@ -10,11 +10,6 @@ TO DO list:
   (0)      - Finish bruteForce:
   (2)        - Fix the overload of the += operator
   (2)        - Find new names for the variable of the "innerSum cycle"
-<<<<<<< HEAD
-=======
-  (0)      - Implement the GA solver
-  (4)         - Derive a Genome for <double> and/or <long double>
->>>>>>> cf88bf5ed09a0687a3ec0814ba11e5a01631e782
   (1)      - (Implement Markov-Chain solver)
 
   (0)    - Literature class:
@@ -33,7 +28,10 @@ TO DO list:
 
   (4)    - Test the version 2.0
            ** DEBUG **
-           - Tune the GA parameters
+           - Tune the GA parameters:
+              - population_size
+              - generations_to_convergence
+
 
   Importance Legend:
     (0) -> dependency needed
