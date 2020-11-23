@@ -310,6 +310,24 @@ void IO::printVec(const vector<int>& v) {
 }
 
 
+void IO::printVec(const vector<double>& v) {
+  cout << '{';
+  for (vector<double>::size_type i = 0; i < v.size()-1; i++) {
+    cout << v[i] << ", ";
+  }
+  cout << v.back() << "}\n";
+}
+
+
+void IO::printVec(const vector<float>& v) {
+  cout << '{';
+  for (vector<float>::size_type i = 0; i < v.size()-1; i++) {
+    cout << v[i] << ", ";
+  }
+  cout << v.back() << "}\n";
+}
+
+
 void IO::printPosterior(const vector<double>& v, const string& file) {
   ofstream out;
   out.open(file);

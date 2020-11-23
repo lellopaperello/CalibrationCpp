@@ -45,78 +45,68 @@ void Posterior::GeneticAlgorithm (const string& gaInputFile = "none") {
   // Monomodal brute force approach to asses the limits of the Posterior
   // General Declarations
   const long double realmin = numeric_limits<double>::min();
-cout << "realmin = " << realmin << '\n';
+
   Literature lit(model);
 
   // OpenMP Declarations (Parallel)
   // int nThreads = 1;
   // omp_set_num_threads(nThreads);
 
-  // Declarations for the Monomodal posterior array [Mono]
-  // Storage order: PostMono = [phi1, ..., phiN | nData]
-  int                         nElMono = 1;            // Number of elements
-  vector<int>                 sizeMono (phi.size());  // Size vector
-  vector<int>                 subMono  (phi.size());  // Subscripts
-  vector<double>              phiMono  (phi.size());  // Current shape parameters
-
-  long double                 maxMonoExp = -1e10;     // Maximum of the posterior
-  long double                 minMonoExp = 1e10;      // Minimum of the posterior
-
-  // Calculate Monomodal posterior elements ------------------------------------
-  for (vector<int>::size_type i = 0; i < phi.size(); i++) {
-    sizeMono[i] = phi[i].vec.size();
-    nElMono *= phi[i].vec.size();
-  }
-
-  // Storage array for the Monomodal Posterior
-  vector<vector<long double>> PostMonoExp (nElMono, vector<long double> (data.N));
-  // vector<vector<long double>> PostMono    (nElMono, vector<long double> (data.N));
-
-  // Cycle over all the possible combination
-  cout << "Calculating monomodal posterior..\n";
-
-  for (int ind = 0; ind < nElMono; ind++) {
-    // From linear index to subscipts
-    ind2sub(sizeMono, ind,  subMono);
-
-    // Creating the current combination of values
-    for (vector<int>::size_type j = 0; j < phi.size(); j++) {
-      phiMono[j] = phi[j].vec[subMono[j]];
-    }
-
-    // Cycle over the data
-    for (int n = 0; n < data.N; n++) {
-      // Calculate only the exponent for numerical purpouses
-      PostMonoExp[ind][n] = -0.5 * pow( ((data.vt[n]
-                          - lit.CalculateVt(data.dv[n], phiMono))
-                          / data.sigma[n]), 2 );
-
-      // Updating maximum and minimum
-      if (PostMonoExp[ind][n] > maxMonoExp) {
-        maxMonoExp = PostMonoExp[ind][n];
-      }else if (PostMonoExp[ind][n] < minMonoExp) {
-        minMonoExp = PostMonoExp[ind][n];
-      }
-    }
-  }
-
-  double base = pow(realmin, -1.0/abs(minMonoExp));
-  // double baseData = pow((double) data.N, 1.0/abs(minMonoExp))
-  //                 / pow(realmin, 1.0/abs(minMonoExp));
-  // double baseMax = pow(realmin, -1.0/abs(maxMonoExp - minMonoExp));
-  // double baseMaxData = pow(realmin, -1.0/abs(maxMonoExp - minMonoExp))
-  //                    / pow((double) data.N, -1.0/abs(maxMonoExp - minMonoExp));
+  // // Declarations for the Monomodal posterior array [Mono]
+  // // Storage order: PostMono = [phi1, ..., phiN | nData]
+  // int                         nElMono = 1;            // Number of elements
+  // vector<int>                 sizeMono (phi.size());  // Size vector
+  // vector<int>                 subMono  (phi.size());  // Subscripts
+  // vector<double>              phiMono  (phi.size());  // Current shape parameters
   //
-
-  cout << "Calculation finished. Posterior Limits:\n"
-       << "Posterior maximum = " << maxMonoExp << '\n'
-       << "Posterior minimum = " << minMonoExp << '\n'
-       << "Rescaling the posterior. The new base will be b = " << base << '\n';
-
-// cout << "log(base) = " << log(base) << '\n';
-// cout << "baseData = " << baseData << '\n'
-//      << "baseMax = " << baseMax << '\n'
-//      << "baseMaxData = " << baseMaxData << '\n';
+  // long double                 maxMonoExp = -1e10;     // Maximum of the posterior
+  // long double                 minMonoExp = 1e10;      // Minimum of the posterior
+  //
+  // // Calculate Monomodal posterior elements ------------------------------------
+  // for (vector<int>::size_type i = 0; i < phi.size(); i++) {
+  //   sizeMono[i] = phi[i].vec.size();
+  //   nElMono *= phi[i].vec.size();
+  // }
+  //
+  // // Storage array for the Monomodal Posterior
+  // vector<vector<long double>> PostMonoExp (nElMono, vector<long double> (data.N));
+  // // vector<vector<long double>> PostMono    (nElMono, vector<long double> (data.N));
+  //
+  // // Cycle over all the possible combination
+  // cout << "Calculating monomodal posterior..\n";
+  //
+  // for (int ind = 0; ind < nElMono; ind++) {
+  //   // From linear index to subscipts
+  //   ind2sub(sizeMono, ind,  subMono);
+  //
+  //   // Creating the current combination of values
+  //   for (vector<int>::size_type j = 0; j < phi.size(); j++) {
+  //     phiMono[j] = phi[j].vec[subMono[j]];
+  //   }
+  //
+  //   // Cycle over the data
+  //   for (int n = 0; n < data.N; n++) {
+  //     // Calculate only the exponent for numerical purpouses
+  //     PostMonoExp[ind][n] = -0.5 * pow( ((data.vt[n]
+  //                         - lit.CalculateVt(data.dv[n], phiMono))
+  //                         / data.sigma[n]), 2 );
+  //
+  //     // Updating maximum and minimum
+  //     if (PostMonoExp[ind][n] > maxMonoExp) {
+  //       maxMonoExp = PostMonoExp[ind][n];
+  //     }else if (PostMonoExp[ind][n] < minMonoExp) {
+  //       minMonoExp = PostMonoExp[ind][n];
+  //     }
+  //   }
+  // }
+  //
+  // double base = pow(realmin, -1.0/abs(minMonoExp));
+  //
+  // cout << "Calculation finished. Posterior Limits:\n"
+  //      << "Posterior maximum = " << maxMonoExp << '\n'
+  //      << "Posterior minimum = " << minMonoExp << '\n'
+  //      << "Rescaling the posterior. The new base will be b = " << base << '\n';
+double base = 0;
 
   // Creating the AlleleSet ----------------------------------------------------
   GARealAlleleSetArray alleles;
@@ -138,7 +128,7 @@ cout << "realmin = " << realmin << '\n';
       alleles.add((int) phi[i].vec.size(), phiFloatArray);
   }
 
-  vector<float> piFloatVec (pi.size());
+  vector<float> piFloatVec;
   for (auto v : pi)
     piFloatVec.push_back(v);
 
@@ -157,7 +147,7 @@ cout << "realmin = " << realmin << '\n';
     .base = base
   };
 
-  GARealGenome genome(alleles, Objective, (void* ) &UD);
+  GARealGenome genome(alleles, Objective3, (void* ) &UD);
 
 
   // Setup a default configuration for the GA (or load it from file) -----------
@@ -168,7 +158,7 @@ cout << "realmin = " << realmin << '\n';
   params.read("config/gaSettings.txt");
 
   // Output the params to check them.
-  params.write("config/gaSettings.out");
+  params.write("gaSettings.out");
 
   // Run the GA ----------------------------------------------------------------
   GASteadyStateGA ga(genome);
@@ -189,33 +179,43 @@ cout << "realmin = " << realmin << '\n';
 
   // Let the GA evolve
   cout << "\nRunning the GA..\n";
-  ga.evolve();
+  // ga.evolve();
+  int step = 0;
+  ga.initialize();
+  // Printing population
+  ofstream out;
+  string filename = "res/population/" + to_string(step) + ".out";
+  out.open(filename);
+  for (size_t p = 0; p < ga.population().size(); p++) {
+    ga.population().individual(p).write(out);
+    out << '\n';
+  }
+  out.close();
+
+  while(!ga.done()) {
+    step++;
+    ga.step();
+    cout.flush();
+    // cout << ga.statistics().convergence() << '\n';
+
+    // Printing population
+    ofstream out;
+    string filename = "res/population/" + to_string(step) + ".out";
+    out.open(filename);
+    for (size_t p = 0; p < ga.population().size(); p++) {
+      ga.population().individual(p).write(out);
+      out << '\n';
+    }
+    out.close();
+  }
 
   // Print the results
   cout << "GA Results:\n" << ga.statistics().bestIndividual() << '\n';
 
 }
 
-float Posterior::Objective2 (GAGenome& g) {
-  // Cast the genome to let the GAGenome acquire all the members of the
-  // GARealGenome
-  GARealGenome& genome = (GARealGenome&)g;
-
-  // And the data provided by the user
-  // userData_t* _UD    = (userData_t*)  g.userData();
-
-  // General Declarations
-  float posterior = 0.0;
-
-  for(int i=0; i<genome.length(); i++){
-    posterior += pow(genome.gene(i), 2);
-    cout << genome.gene(i) << " " << pow(genome.gene(i), 2) << " ";
-  }
-cout << posterior << '\n';
-  return -posterior;
-}
-
-// Objective function for the GA ( log(Posterior([Phi, pi])) )
+// Objectives function for the GA
+// Posterior ( log(Posterior([Phi, pi])) )
 float Posterior::Objective (GAGenome& g) {
   // Cast the genome to let the GAGenome acquire all the members of the
   // GARealGenome
@@ -231,11 +231,12 @@ float Posterior::Objective (GAGenome& g) {
 
   // Extract coefficeints and enforce normalization constraint
   vector<double> curr_pi (_UD->K-1);
-  for (int i = genome.length()-_UD->K+1; i < genome.length(); i++) {
-        curr_pi.push_back((double) genome.gene(i));
+  for (int ig = genome.length()-_UD->K+1, ip = 0;
+       ig < genome.length() && ip < curr_pi.size(); ig++, ip++) {
+        curr_pi[ip] = (double) genome.gene(ig);
   }
   vector<double> coeff = normConstraint(curr_pi);
-
+// IO::printVec(coeff);
 
   // Outer Summation (n) ~ Using the logarithm for numerical purpouses.
   for (int n = 0; n < _UD->data.N; n++) {
@@ -266,6 +267,47 @@ float Posterior::Objective (GAGenome& g) {
   return (float) -posterior;
 }
 
+
+// Benchmark : convex function
+float Posterior::Objective2 (GAGenome& g) {
+  // Cast the genome to let the GAGenome acquire all the members of the
+  // GARealGenome
+  GARealGenome& genome = (GARealGenome&)g;
+
+  // And the data provided by the user
+  // userData_t* _UD    = (userData_t*)  g.userData();
+
+  // General Declarations
+  float posterior = 0.0;
+
+  for(int i=0; i<genome.length(); i++){
+    posterior += pow(genome.gene(i), 2);
+    cout << genome.gene(i) << " " << pow(genome.gene(i), 2) << " ";
+  }
+
+  return -posterior;
+}
+
+
+// Benchmark : Rastrigin function
+float Posterior::Objective3 (GAGenome& g) {
+  // Cast the genome to let the GAGenome acquire all the members of the
+  // GARealGenome
+  GARealGenome& genome = (GARealGenome&)g;
+
+
+  // General Declarations
+  float A = 10;
+  float scale = 1e0;
+  int n = genome.length();
+  float value = A * (float) n;
+
+  for (size_t i = 0; i < n; i++) {
+    value += (pow(genome.gene(i), 2) - A * cos(6.2831854 * genome.gene(i)));
+  }
+
+  return value * scale + 0.1;
+}
 
 
 // Brute Force approach --------------------------------------------------------

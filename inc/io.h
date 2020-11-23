@@ -22,8 +22,11 @@ public:
   // Methods
   Settings loadSettings(const char * configFile);
   void printProgress(int i, int &prog);
-  void printVec(const vector<int>& v);
   void printPosterior(const vector<double>& v, const string& file);
+
+  static void printVec(const vector<int>& v);
+  static void printVec(const vector<double>& v);
+  static void printVec(const vector<float>& v);
 };
 
 #endif // IO_H

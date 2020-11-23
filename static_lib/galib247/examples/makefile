@@ -12,7 +12,7 @@ include ../makevars
 #GA_INC_DIR= /usr/local/include
 #GA_LIB_DIR= /usr/local/lib
 GA_INC_DIR= ../../include
-GA_LIB_DIR= ../..
+GA_LIB_DIR= ../../lib
 
 INC_DIRS= -I$(GA_INC_DIR)
 LIB_DIRS= -L$(GA_LIB_DIR)

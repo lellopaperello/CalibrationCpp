@@ -61,8 +61,9 @@ private:
   static vector<double> normConstraint(vector<double> pi);
   long double findMax(const vector<vector<long double>>& vec, int s1, int s2);
 
-  static float Objective (GAGenome &);
+  static float Objective  (GAGenome &);
   static float Objective2 (GAGenome &);
+  static float Objective3 (GAGenome &);
 };
 
 #endif // POSTERIOR_H

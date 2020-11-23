@@ -19,6 +19,7 @@
 
 # Logs and databases #
 ######################
+*.out
 *.log
 *.vtk
 *.msh
