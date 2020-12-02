@@ -7,24 +7,37 @@
 int main(int argc, char const *argv[]) {
 
   DataHandler dataHandler;
+  Settings settings;
   IO          io;
 
   // Loading Input Settings
-  Settings settings = io.loadSettings("config/gaTestRastrigin.cfg");
+  if (argc == 2) {
+    settings = io.loadSettings(argv[1]);
+  } else if (argc == 1) {
+    settings = io.loadSettings("config/config.cfg");
+  } else { // argc > 2
+    cout << "Error: too many input arguments.";
+    return 0;
+  }
 
-  // string postOutFIle = "res/validation.txt";
+
   // Generation / Loading of an artificial dataset -----------------------------
-  // data_t data = dataHandler.GenerateTestCase(settings.testCase);
-  data_t data = dataHandler.LoadData("config/dataset.dat", false);
+  data_t data;
+  if (settings.type == "generate") {
+    data = dataHandler.GenerateTestCase(settings.testCase);
+  } else if (settings.type == "load") {
+    data = dataHandler.LoadData(settings.dataInFile, settings.printData);
+  }
 
 
   // Data Analysis - Posterior generation --------------------------------------
   Posterior posterior(data, settings.phi, settings.pi, settings.model);
-  // vector<double> post = posterior.bruteForce();
-  posterior.GeneticAlgorithm();
-
-  // Saving results
-  // io.printPosterior(post, postOutFIle);
+  if (settings.approach == "bruteforce") {
+    vector<double> post = posterior.bruteForce();
+    io.printPosterior(post, settings.postOutFile);
+  } else if (settings.approach == "GA") {
+    posterior.GeneticAlgorithm();
+  }
 
   return 0;
 }

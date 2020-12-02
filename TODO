@@ -3,8 +3,9 @@ TO DO list:
 
   (0)    - i/o class:
   (2)      - Update the parser for the INPUT
+  (1)        - write a different parser for the GA
   (2)      - Update the OUTPUT functions -> Matlab compatible
-  (2)      - Fix the result location
+  (3)      - Fix the result and output location
 
   (0)    - Posterior class:
   (0)      - Finish bruteForce:
@@ -13,7 +14,6 @@ TO DO list:
   (1)      - (Implement Markov-Chain solver)
 
   (0)    - Literature class:
-  (3)      - (Add other models to the implementation ~ H&S)
   (1)      - (Add the interface for the solver selection)
 
   (0)    - Solver class:
@@ -22,15 +22,11 @@ TO DO list:
 
   (0)    - Add Data Acquisition / Generator class
   (1)      - Test -> Test structure -> Implement Multimodal test cases
-  (3)      - Implement load data from file (Generation will be held by Matlab)
 
   (1)    - Study the error message handling in c++
 
   (4)    - Test the version 2.0
            ** DEBUG **
-           - Tune the GA parameters:
-              - population_size
-              - generations_to_convergence
 
 
   Importance Legend:

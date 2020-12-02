@@ -20,7 +20,7 @@ class IO
 {
 public:
   // Methods
-  Settings loadSettings(const char * configFile);
+  Settings loadSettings(const char *configFile);
   void printProgress(int i, int &prog);
   void printPosterior(const vector<double>& v, const string& file);
 

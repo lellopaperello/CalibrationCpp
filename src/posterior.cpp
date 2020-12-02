@@ -52,61 +52,61 @@ void Posterior::GeneticAlgorithm (const string& gaInputFile = "none") {
   // int nThreads = 1;
   // omp_set_num_threads(nThreads);
 
-  // // Declarations for the Monomodal posterior array [Mono]
-  // // Storage order: PostMono = [phi1, ..., phiN | nData]
-  // int                         nElMono = 1;            // Number of elements
-  // vector<int>                 sizeMono (phi.size());  // Size vector
-  // vector<int>                 subMono  (phi.size());  // Subscripts
-  // vector<double>              phiMono  (phi.size());  // Current shape parameters
-  //
-  // long double                 maxMonoExp = -1e10;     // Maximum of the posterior
-  // long double                 minMonoExp = 1e10;      // Minimum of the posterior
-  //
-  // // Calculate Monomodal posterior elements ------------------------------------
-  // for (vector<int>::size_type i = 0; i < phi.size(); i++) {
-  //   sizeMono[i] = phi[i].vec.size();
-  //   nElMono *= phi[i].vec.size();
-  // }
-  //
-  // // Storage array for the Monomodal Posterior
-  // vector<vector<long double>> PostMonoExp (nElMono, vector<long double> (data.N));
-  // // vector<vector<long double>> PostMono    (nElMono, vector<long double> (data.N));
-  //
-  // // Cycle over all the possible combination
-  // cout << "Calculating monomodal posterior..\n";
-  //
-  // for (int ind = 0; ind < nElMono; ind++) {
-  //   // From linear index to subscipts
-  //   ind2sub(sizeMono, ind,  subMono);
-  //
-  //   // Creating the current combination of values
-  //   for (vector<int>::size_type j = 0; j < phi.size(); j++) {
-  //     phiMono[j] = phi[j].vec[subMono[j]];
-  //   }
-  //
-  //   // Cycle over the data
-  //   for (int n = 0; n < data.N; n++) {
-  //     // Calculate only the exponent for numerical purpouses
-  //     PostMonoExp[ind][n] = -0.5 * pow( ((data.vt[n]
-  //                         - lit.CalculateVt(data.dv[n], phiMono))
-  //                         / data.sigma[n]), 2 );
-  //
-  //     // Updating maximum and minimum
-  //     if (PostMonoExp[ind][n] > maxMonoExp) {
-  //       maxMonoExp = PostMonoExp[ind][n];
-  //     }else if (PostMonoExp[ind][n] < minMonoExp) {
-  //       minMonoExp = PostMonoExp[ind][n];
-  //     }
-  //   }
-  // }
-  //
-  // double base = pow(realmin, -1.0/abs(minMonoExp));
-  //
-  // cout << "Calculation finished. Posterior Limits:\n"
-  //      << "Posterior maximum = " << maxMonoExp << '\n'
-  //      << "Posterior minimum = " << minMonoExp << '\n'
-  //      << "Rescaling the posterior. The new base will be b = " << base << '\n';
-double base = 0;
+  // Declarations for the Monomodal posterior array [Mono]
+  // Storage order: PostMono = [phi1, ..., phiN | nData]
+  int                         nElMono = 1;            // Number of elements
+  vector<int>                 sizeMono (phi.size());  // Size vector
+  vector<int>                 subMono  (phi.size());  // Subscripts
+  vector<double>              phiMono  (phi.size());  // Current shape parameters
+
+  long double                 maxMonoExp = -1e10;     // Maximum of the posterior
+  long double                 minMonoExp = 1e10;      // Minimum of the posterior
+
+  // Calculate Monomodal posterior elements ------------------------------------
+  for (vector<int>::size_type i = 0; i < phi.size(); i++) {
+    sizeMono[i] = phi[i].vec.size();
+    nElMono *= phi[i].vec.size();
+  }
+
+  // Storage array for the Monomodal Posterior
+  vector<vector<long double>> PostMonoExp (nElMono, vector<long double> (data.N));
+  // vector<vector<long double>> PostMono    (nElMono, vector<long double> (data.N));
+
+  // Cycle over all the possible combination
+  cout << "Calculating monomodal posterior..\n";
+
+  for (int ind = 0; ind < nElMono; ind++) {
+    // From linear index to subscipts
+    ind2sub(sizeMono, ind,  subMono);
+
+    // Creating the current combination of values
+    for (vector<int>::size_type j = 0; j < phi.size(); j++) {
+      phiMono[j] = phi[j].vec[subMono[j]];
+    }
+
+    // Cycle over the data
+    for (int n = 0; n < data.N; n++) {
+      // Calculate only the exponent for numerical purpouses
+      PostMonoExp[ind][n] = -0.5 * pow( ((data.vt[n]
+                          - lit.CalculateVt(data.dv[n], phiMono))
+                          / data.sigma[n]), 2 );
+
+      // Updating maximum and minimum
+      if (PostMonoExp[ind][n] > maxMonoExp) {
+        maxMonoExp = PostMonoExp[ind][n];
+      }else if (PostMonoExp[ind][n] < minMonoExp) {
+        minMonoExp = PostMonoExp[ind][n];
+      }
+    }
+  }
+
+  double base = pow(realmin, -1.0/abs(minMonoExp));
+
+  cout << "Calculation finished. Posterior Limits:\n"
+       << "Posterior maximum = " << maxMonoExp << '\n'
+       << "Posterior minimum = " << minMonoExp << '\n'
+       << "Rescaling the posterior. The new base will be b = " << base << '\n';
+
 
   // Creating the AlleleSet ----------------------------------------------------
   GARealAlleleSetArray alleles;
@@ -147,12 +147,13 @@ double base = 0;
     .base = base
   };
 
-  GARealGenome genome(alleles, Objective3, (void* ) &UD);
+  GARealGenome genome(alleles, Objective, (void* ) &UD);
 
 
   // Setup a default configuration for the GA (or load it from file) -----------
   GAParameterList params;
   GASteadyStateGA::registerDefaultParameters(params);
+  // GADemeGA::registerDefaultParameters(params);
 
   // Read params from file
   params.read("config/gaSettings.txt");
@@ -162,6 +163,7 @@ double base = 0;
 
   // Run the GA ----------------------------------------------------------------
   GASteadyStateGA ga(genome);
+  // GADemeGA ga(genome);
 
   // Set the general parameters from the file
   ga.parameters(params);
@@ -199,14 +201,14 @@ double base = 0;
     // cout << ga.statistics().convergence() << '\n';
 
     // Printing population
-    ofstream out;
-    string filename = "res/population/" + to_string(step) + ".out";
-    out.open(filename);
-    for (size_t p = 0; p < ga.population().size(); p++) {
-      ga.population().individual(p).write(out);
-      out << '\n';
-    }
-    out.close();
+    // ofstream out;
+    // string filename = "res/population/" + to_string(step) + ".out";
+    // out.open(filename);
+    // for (size_t p = 0; p < ga.population().size(); p++) {
+    //   ga.population().individual(p).write(out);
+    //   out << '\n';
+    // }
+    // out.close();
   }
 
   // Print the results

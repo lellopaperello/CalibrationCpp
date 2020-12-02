@@ -130,6 +130,26 @@ Settings IO::loadSettings(const char *configFile) {
       {
         cerr << "No 'nData' setting in 'dataSet' section in configuration file." << endl;
       }
+    } else if (settings.type == "load") {
+      try
+      {
+        string datafile = dataSet.lookup("file");
+        settings.dataInFile = datafile;
+      }
+      catch(const SettingNotFoundException &nfex)
+      {
+        cerr << "No 'file' specified for the 'load' setting in 'dataSet' section in configuration file." << endl;
+      }
+
+      try
+      {
+        bool printData = dataSet.lookup("printData");
+        settings.printData = printData;
+      }
+      catch(const SettingNotFoundException &nfex)
+      {
+        // Ignore
+      }
     }
   }
   catch(const SettingNotFoundException &nfex)
@@ -141,6 +161,17 @@ Settings IO::loadSettings(const char *configFile) {
   try
   {
     const Setting &dataAnalysis = root["dataAnalysis"];
+
+    // Approach selection
+    try
+    {
+      string approach = dataAnalysis.lookup("approach");
+      settings.approach = approach;
+    }
+    catch(const SettingNotFoundException &nfex)
+    {
+      cerr << "No 'approach' setting in 'dataAnalysis' section in configuration file." << endl;
+    }
 
     // Model selection
     try
@@ -275,9 +306,6 @@ Settings IO::loadSettings(const char *configFile) {
   {
     cerr << "No 'dataAnalysis' setting in configuration file." << endl;
   }
-
-
-
 
   return settings;
 }

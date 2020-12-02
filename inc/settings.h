@@ -53,6 +53,7 @@ public:
                         };
 
   // Data Analysis
+  string         approach = "InsertApproachHere";
   string         model = "InsertModelHere";
   vector<phi_t>  phi = {};
   vector<double> pi = {};
@@ -61,6 +62,13 @@ public:
   double rho_a = 1.225;
   double mu = 1.715e-5;
   double g = 9.81;
+
+  // Input / Output
+  string dataInFile  = "dataset.dat";
+  bool   printData   = false;
+  string outFile     = "screen";
+  string postOutFile = "res/posterior.txt";
+
 private:
 protected:
 };
