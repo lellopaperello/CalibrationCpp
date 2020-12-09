@@ -54,6 +54,7 @@ public:
 
   // Data Analysis
   string         approach = "InsertApproachHere";
+  string         gaInputFile = "none";
   string         model = "InsertModelHere";
   vector<phi_t>  phi = {};
   vector<double> pi = {};

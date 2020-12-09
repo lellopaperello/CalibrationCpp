@@ -41,7 +41,7 @@ Posterior::Posterior(const data_t& DATA, const vector<phi_t>& PHI,
 };
 
 // Genetic Algorithm approach --------------------------------------------------
-void Posterior::GeneticAlgorithm (const string& gaInputFile = "none") {
+void Posterior::GeneticAlgorithm (const string& gaInputFile) {
   // Monomodal brute force approach to asses the limits of the Posterior
   // General Declarations
   const long double realmin = numeric_limits<double>::min();
@@ -156,7 +156,9 @@ void Posterior::GeneticAlgorithm (const string& gaInputFile = "none") {
   // GADemeGA::registerDefaultParameters(params);
 
   // Read params from file
-  params.read("config/gaSettings.txt");
+  if (gaInputFile != "none") {
+    params.read(gaInputFile.c_str());
+  }
 
   // Output the params to check them.
   params.write("gaSettings.out");

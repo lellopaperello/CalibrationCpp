@@ -167,6 +167,18 @@ Settings IO::loadSettings(const char *configFile) {
     {
       string approach = dataAnalysis.lookup("approach");
       settings.approach = approach;
+
+      if (settings.approach == "GA") {
+        try
+        {
+          string gaInputFile = dataAnalysis.lookup("inputFile");
+          settings.gaInputFile = gaInputFile;
+        }
+        catch(const SettingNotFoundException &nfex)
+        {
+          // Ignore
+        }
+      }
     }
     catch(const SettingNotFoundException &nfex)
     {

@@ -36,7 +36,7 @@ int main(int argc, char const *argv[]) {
     vector<double> post = posterior.bruteForce();
     io.printPosterior(post, settings.postOutFile);
   } else if (settings.approach == "GA") {
-    posterior.GeneticAlgorithm();
+    posterior.GeneticAlgorithm(settings.gaInputFile);
   }
 
   return 0;
