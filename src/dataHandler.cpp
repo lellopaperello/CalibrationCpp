@@ -8,25 +8,30 @@ data_t DataHandler::LoadData(const string& dataFile, bool printData) {
   ifstream file (dataFile);
   data_t data;
 
-  getline(file, data.name);
-  getline(file, data.longname);
-  file >> data.N;
+  if (file.is_open()) {
+    getline(file, data.name);
+    getline(file, data.longname);
+    file >> data.N;
 
-  data.dv.resize(data.N);
-  data.vt.resize(data.N);
-  data.sigma.resize(data.N);
-  for (int i = 0; i < data.N; i++) {
-    file >> data.dv[i];
-    file >> data.vt[i];
-    file >> data.sigma[i];
-  }
-
-  if (printData) {
+    data.dv.resize(data.N);
+    data.vt.resize(data.N);
+    data.sigma.resize(data.N);
     for (int i = 0; i < data.N; i++) {
-      cout << data.dv[i] << ' ';
-      cout << data.vt[i] << ' ';
-      cout << data.sigma[i] << '\n';
+      file >> data.dv[i];
+      file >> data.vt[i];
+      file >> data.sigma[i];
     }
+
+    if (printData) {
+      for (int i = 0; i < data.N; i++) {
+        cout << data.dv[i] << ' ';
+        cout << data.vt[i] << ' ';
+        cout << data.sigma[i] << '\n';
+      }
+    }
+  } else {
+    cout << "Error: Unable to open file \"" << dataFile << "\".\n"
+         << "Make sure that the file exists and verify the relative path.\n";
   }
 
   return data;

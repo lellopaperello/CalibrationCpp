@@ -31,6 +31,7 @@
 
 # Ignored Folders #
 ###################
+dataset/
 config/
 bozze/
 res/
