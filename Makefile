@@ -48,3 +48,10 @@ clean:
 remove: clean
 	@$(rm) $(BINDIR)/$(TARGET).exe
 	@echo "Executable removed!"
+
+.PHONY: install
+install:
+	@echo "Add the following line to your .bashrc file"
+	@echo
+	@echo "export PATH=\$$PATH:${PWD}/${BINDIR}"
+	@echo
