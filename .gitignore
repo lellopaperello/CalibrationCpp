@@ -1,5 +1,6 @@
 # Compiled source #
 ###################
+calibration
 *.exe
 *.o
 *.a
@@ -31,6 +32,7 @@
 
 # Ignored Folders #
 ###################
+work/
 dataset/
 config/
 bozze/

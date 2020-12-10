@@ -31,7 +31,7 @@ OBJECTS   := $(SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
 rm        = rm -f
 
 
-$(BINDIR)/$(TARGET).exe: $(OBJECTS)
+$(BINDIR)/$(TARGET): $(OBJECTS)
 	@$(LINKER) $(OBJECTS) $(LFLAGS) -o $@
 	@echo "Linking complete!"
 
