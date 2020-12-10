@@ -7,7 +7,7 @@ TARGET    = calibration
 
 CC        = g++
 # compiling flags here
-CFLAGS    = -g -fopenmp -ggdb -w -Wall -I$(INCDIR) $(LIBFLAGS)
+CFLAGS    = -g -fopenmp -ggdb -w -Wall -std=c++11 -I$(INCDIR) $(LIBFLAGS)
 
 LINKER    = g++
 # linking flags here
@@ -32,10 +32,12 @@ rm        = rm -f
 
 
 $(BINDIR)/$(TARGET): $(OBJECTS)
+	@mkdir -p $(BINDIR)
 	@$(LINKER) $(OBJECTS) $(LFLAGS) -o $@
 	@echo "Linking complete!"
 
 $(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp
+	@mkdir -p $(OBJDIR)
 	@$(CC) $(CFLAGS) -c $< -o $@
 	@echo "Compiled "$<" successfully!"
 
@@ -53,5 +55,6 @@ remove: clean
 install:
 	@echo "Add the following line to your .bashrc file"
 	@echo
+	@echo "# Thesis Project - calibration"
 	@echo "export PATH=\$$PATH:${PWD}/${BINDIR}"
 	@echo
