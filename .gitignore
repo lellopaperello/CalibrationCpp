@@ -4,6 +4,7 @@ calibration
 *.exe
 *.o
 *.a
+*.sh
 
 # Packages #
 ############
