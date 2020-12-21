@@ -220,46 +220,48 @@ void Posterior::GeneticAlgorithm (const string& gaInputFile,
   // Solution reconstruction
   GARealGenome& best = (GARealGenome&) ga.statistics().bestIndividual();
   vector<vector<float>> solution (K, vector<float> (phi.size()+1));
-  vector<vector<float>> phiBest;
-  vector<float>         piBest (K-1);
+  if (K != 1) {
+    vector<vector<float>> phiBest;
+    vector<float>         piBest (K-1);
 
-  // Extract the solution into the appropriate containers.
-  int solPosition = 0;
-  for (size_t i = 0; i < phi.size(); i++) {
-    vector<float> phiCurrBest (phi[i].K);
-    for (size_t k = 0; k < phi[i].K; k++) {
-      phiCurrBest[k] = best[solPosition];
+    // Extract the solution into the appropriate containers.
+    int solPosition = 0;
+    for (size_t i = 0; i < phi.size(); i++) {
+      vector<float> phiCurrBest (phi[i].K);
+      for (size_t k = 0; k < phi[i].K; k++) {
+        phiCurrBest[k] = best[solPosition];
+        solPosition++;
+      }
+      phiBest.push_back(phiCurrBest);
+    }
+
+    for (size_t i = 0; i < K-1; i++) {
+      piBest[i] = best[solPosition];
       solPosition++;
     }
-    phiBest.push_back(phiCurrBest);
-  }
+    // Reconstruct the solution
+    vector<float> coeffBest = normConstraint(piBest);
+    for (int k = 0; k < K; k++) {
+      vector<int> subK (phi.size());
+      ind2sub(Kvec, k,  subK);
 
-  for (size_t i = 0; i < K-1; i++) {
-    piBest[i] = best[solPosition];
-    solPosition++;
-  }
-  // Reconstruct the solution
-  vector<float> coeffBest = normConstraint(piBest);
-  for (int k = 0; k < K; k++) {
-    vector<int> subK (phi.size());
-    ind2sub(Kvec, k,  subK);
-
-    for (size_t i = 0; i < phi.size(); i++) {
-      solution[k][i] = phiBest[i][subK[i]];
+      for (size_t i = 0; i < phi.size(); i++) {
+        solution[k][i] = phiBest[i][subK[i]];
+      }
+      solution[k][phi.size()] = coeffBest[k];
     }
-    solution[k][phi.size()] = coeffBest[k];
-  }
 
-  // Print the reconstructed solution
-  cout << "Reconstructed Solution:\n";
-  for (size_t k = 0; k < K; k++) {
-    cout << "(";
-    for (size_t i = 0; i < phi.size(); i++) {
-      cout << solution[k][i] << ", ";
+    // Print the reconstructed solution
+    cout << "Reconstructed Solution:\n";
+    for (size_t k = 0; k < K; k++) {
+      cout << "(";
+      for (size_t i = 0; i < phi.size(); i++) {
+        cout << solution[k][i] << ", ";
+      }
+      cout << solution[k][phi.size()] << ")  ";
     }
-    cout << solution[k][phi.size()] << ")  ";
+    cout << '\n';
   }
-  cout << '\n';
 
 
   // Save the results in the outputFile (if present)
@@ -267,14 +269,22 @@ void Posterior::GeneticAlgorithm (const string& gaInputFile,
     ofstream out;
     out.open(gaOutputFile, ofstream::out | ofstream::app);
 
-    for (size_t k = 0; k < K; k++) {
+    if (K == 1) {
       out << "(";
-      for (size_t i = 0; i < phi.size(); i++) {
-        out << solution[k][i] << ", ";
+      for (size_t i = 0; i < phi.size()-1; i++) {
+        out << best[i] << ", ";
       }
-      out << solution[k][phi.size()] << ")  ";
+      out << best[phi.size()] << ")\n";
+    } else {
+      for (size_t k = 0; k < K; k++) {
+        out << "(";
+        for (size_t i = 0; i < phi.size(); i++) {
+          out << solution[k][i] << ", ";
+        }
+        out << solution[k][phi.size()] << ")  ";
+      }
+      out << '\n';
     }
-    out << '\n';
     out.close();
   }
 }
