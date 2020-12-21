@@ -41,7 +41,8 @@ Posterior::Posterior(const data_t& DATA, const vector<phi_t>& PHI,
 };
 
 // Genetic Algorithm approach --------------------------------------------------
-void Posterior::GeneticAlgorithm (const string& gaInputFile) {
+void Posterior::GeneticAlgorithm (const string& gaInputFile,
+                                  const string& gaOutputFile) {
   // Monomodal brute force approach to asses the limits of the Posterior
   // General Declarations
   const long double realmin = numeric_limits<double>::min();
@@ -213,9 +214,69 @@ void Posterior::GeneticAlgorithm (const string& gaInputFile) {
     // out.close();
   }
 
-  // Print the results
+  // Print the raw results
   cout << "GA Results:\n" << ga.statistics().bestIndividual() << '\n';
 
+  // Solution reconstruction
+  GARealGenome& best = (GARealGenome&) ga.statistics().bestIndividual();
+  vector<vector<float>> solution (K, vector<float> (phi.size()+1));
+  vector<vector<float>> phiBest;
+  vector<float>         piBest (K-1);
+
+  // Extract the solution into the appropriate containers.
+  int solPosition = 0;
+  for (size_t i = 0; i < phi.size(); i++) {
+    vector<float> phiCurrBest (phi[i].K);
+    for (size_t k = 0; k < phi[i].K; k++) {
+      phiCurrBest[k] = best[solPosition];
+      solPosition++;
+    }
+    phiBest.push_back(phiCurrBest);
+  }
+
+  for (size_t i = 0; i < K-1; i++) {
+    piBest[i] = best[solPosition];
+    solPosition++;
+  }
+  // Reconstruct the solution
+  vector<float> coeffBest = normConstraint(piBest);
+  for (int k = 0; k < K; k++) {
+    vector<int> subK (phi.size());
+    ind2sub(Kvec, k,  subK);
+
+    for (size_t i = 0; i < phi.size(); i++) {
+      solution[k][i] = phiBest[i][subK[i]];
+    }
+    solution[k][phi.size()] = coeffBest[k];
+  }
+
+  // Print the reconstructed solution
+  cout << "Reconstructed Solution:\n";
+  for (size_t k = 0; k < K; k++) {
+    cout << "(";
+    for (size_t i = 0; i < phi.size(); i++) {
+      cout << solution[k][i] << ", ";
+    }
+    cout << solution[k][phi.size()] << ")  ";
+  }
+  cout << '\n';
+
+
+  // Save the results in the outputFile (if present)
+  if (gaOutputFile != "none") {
+    ofstream out;
+    out.open(gaOutputFile, ofstream::out | ofstream::app);
+
+    for (size_t k = 0; k < K; k++) {
+      out << "(";
+      for (size_t i = 0; i < phi.size(); i++) {
+        out << solution[k][i] << ", ";
+      }
+      out << solution[k][phi.size()] << ")  ";
+    }
+    out << '\n';
+    out.close();
+  }
 }
 
 // Objectives function for the GA
@@ -240,7 +301,6 @@ float Posterior::Objective (GAGenome& g) {
         curr_pi[ip] = (double) genome.gene(ig);
   }
   vector<double> coeff = normConstraint(curr_pi);
-// IO::printVec(coeff);
 
   // Outer Summation (n) ~ Using the logarithm for numerical purpouses.
   for (int n = 0; n < _UD->data.N; n++) {
@@ -594,6 +654,23 @@ vector<double> Posterior::normConstraint(vector<double> pi) {
 
   pi.push_back(1.0);
   vector<double> pi_star (pi.size());
+
+  for (size_t k = 0; k < pi.size(); k++) {
+    pi_star[k] = 1;
+    for (size_t i = 0; i <= k; i++) {
+      pi_star[k] *=  (i == k) ? pi[i] : (1 - pi[i]);
+    }
+  }
+  return pi_star;
+}
+
+vector<float> Posterior::normConstraint(vector<float> pi) {
+  // Enforcing the normalization constraint on the K-1 indipendent choices of
+  // the mixing coefficient to get the K values for which:
+  //                  sum(pi_star) = 1
+
+  pi.push_back(1.0);
+  vector<float> pi_star (pi.size());
 
   for (size_t k = 0; k < pi.size(); k++) {
     pi_star[k] = 1;

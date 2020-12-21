@@ -178,6 +178,16 @@ Settings IO::loadSettings(const char *configFile) {
         {
           // Ignore
         }
+
+        try
+        {
+          string gaOutputFile = dataAnalysis.lookup("outputFile");
+          settings.gaOutputFile = gaOutputFile;
+        }
+        catch(const SettingNotFoundException &nfex)
+        {
+          // Ignore
+        }
       }
     }
     catch(const SettingNotFoundException &nfex)

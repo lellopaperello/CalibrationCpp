@@ -33,7 +33,8 @@ public:
 
   // Methods
   vector<double> bruteForce ();
-  void GeneticAlgorithm (const string& gaInputFile = "none");
+  void GeneticAlgorithm (const string& gaInputFile = "none",
+                         const string& gaOutputFile = "none");
 
   // Useful functions
   static void ind2sub(const vector<int>& size, int ind,  vector<int>& sub);
@@ -59,6 +60,7 @@ private:
   // Methods
   static vector<int> cumprod(const vector<int>& size);
   static vector<double> normConstraint(vector<double> pi);
+  static vector<float> normConstraint(vector<float> pi);
   long double findMax(const vector<vector<long double>>& vec, int s1, int s2);
 
   static float Objective  (GAGenome &);
