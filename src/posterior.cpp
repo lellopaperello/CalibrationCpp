@@ -274,7 +274,7 @@ void Posterior::GeneticAlgorithm (const string& gaInputFile,
       for (size_t i = 0; i < phi.size()-1; i++) {
         out << best[i] << ", ";
       }
-      out << best[phi.size()] << ")\n";
+      out << best[phi.size()-1] << ")\n";
     } else {
       for (size_t k = 0; k < K; k++) {
         out << "(";
