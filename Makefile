@@ -23,7 +23,7 @@ BINDIR    = bin
 # Library flags and folders
 LIBFLAGS  = -fpermissive -Istatic_lib/include
 LIBDIR    = static_lib/lib
-LIB       = -lga -lconfig++
+LIB       = -l:libga.a -l:libconfig++.a
 
 SOURCES   := $(wildcard $(SRCDIR)/*.cpp)
 INCLUDES  := $(wildcard $(INCDIR)/*.h)
