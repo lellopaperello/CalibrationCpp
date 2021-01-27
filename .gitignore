@@ -38,6 +38,7 @@ dataset/
 config/
 bozze/
 res/
+resMegamind/
 static_lib/include
 static_lib/lib
 static_lib/share
