@@ -10,8 +10,13 @@ using namespace std;
 struct phi_t{
   string          name;
   string          latex;
-  int             K;
   vector<double>  vec;
+  double          step;
+};
+
+struct pi_t{
+  vector<double>  vec;
+  double          step;
 };
 
 struct data_t {
@@ -58,7 +63,9 @@ public:
   string         gaOutputFile = "none";
   string         model = "InsertModelHere";
   vector<phi_t>  phi = {};
-  vector<double> pi = {};
+  int            K = 1;
+  pi_t           pi = {};
+  double         piStep;
 
   // Ambient parameters
   double rho_a = 1.225;

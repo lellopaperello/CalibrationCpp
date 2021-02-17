@@ -31,7 +31,7 @@ int main(int argc, char const *argv[]) {
 
 
   // Data Analysis - Posterior generation --------------------------------------
-  Posterior posterior(data, settings.phi, settings.pi, settings.model);
+  Posterior posterior(data, settings.phi, settings.K, settings.pi, settings.model);
   if (settings.approach == "bruteforce") {
     vector<double> post = posterior.bruteForce();
     io.printPosterior(post, settings.postOutFile);

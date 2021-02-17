@@ -33,10 +33,12 @@
 
 // Constructor
 Posterior::Posterior(const data_t& DATA, const vector<phi_t>& PHI,
-                     const vector<double>& PI, const string& MODEL) {
-  data = DATA;
-  phi = PHI;
-  pi = PI;
+                     const int& NMODES, const pi_t& PI,
+                     const string& MODEL) {
+  data  = DATA;
+  phi   = PHI;
+  K     = NMODES;
+  pi    = PI;
   model = MODEL;
 };
 
@@ -113,37 +115,46 @@ void Posterior::GeneticAlgorithm (const string& gaInputFile,
   GARealAlleleSetArray alleles;
 
   // Create <float> input structure for the GAlib
-  int K = 1;
-  vector<int> Kvec;
   for (vector<phi_t>::size_type i = 0; i < phi.size(); i++) {
-    K *= phi[i].K;
-    Kvec.push_back(phi[i].K);
+    if (phi[i].step == 0) {
+      vector<float> phiFloatVec;
+      for (auto v : phi[i].vec)
+        phiFloatVec.push_back(v);
 
-    vector<float> phiFloatVec;
-    for (auto v : phi[i].vec)
-      phiFloatVec.push_back(v);
+      float* phiFloatArray = phiFloatVec.data();
 
-    float* phiFloatArray = phiFloatVec.data();
+      for (int k = 0; k < K; k++)
+        alleles.add((int) phi[i].vec.size(), phiFloatArray);
 
-    for (int k = 0; k < phi[i].K; k++)
-      alleles.add((int) phi[i].vec.size(), phiFloatArray);
+    } else {
+      for (int k = 0; k < K; k++)
+        alleles.add(phi[i].vec[0], phi[i].vec.back(), phi[i].step,
+                    GAAllele::INCLUSIVE, GAAllele::INCLUSIVE);
+    }
   }
 
-  vector<float> piFloatVec;
-  for (auto v : pi)
-    piFloatVec.push_back(v);
+  if (pi.step == 0) {
+    vector<float> piFloatVec;
+    for (auto v : pi.vec)
+      piFloatVec.push_back(v);
 
-  float* piFloatArray = piFloatVec.data();
+    float* piFloatArray = piFloatVec.data();
 
-  for (int k = 0; k < K-1; k++)
-    alleles.add((int) pi.size(), piFloatArray);
+    for (int k = 0; k < K-1; k++)
+      alleles.add((int) pi.vec.size(), piFloatArray);
+
+  } else {
+      for (int k = 0; k < K-1; k++)
+        alleles.add(pi.vec[0], pi.vec.back(), pi.step,
+                    GAAllele::INCLUSIVE, GAAllele::INCLUSIVE);
+  }
 
   // Creating the userData structure (Every parameter that the function needs
   // to know since it's static)
   userData_t UD = {
     .data  = data,
+    .D     = phi.size(),
     .K     = K,
-    .Kvec  = Kvec,
     .model = model,
     .base = base
   };
@@ -227,8 +238,8 @@ void Posterior::GeneticAlgorithm (const string& gaInputFile,
     // Extract the solution into the appropriate containers.
     int solPosition = 0;
     for (size_t i = 0; i < phi.size(); i++) {
-      vector<float> phiCurrBest (phi[i].K);
-      for (size_t k = 0; k < phi[i].K; k++) {
+      vector<float> phiCurrBest (K);
+      for (size_t k = 0; k < K; k++) {
         phiCurrBest[k] = best[solPosition];
         solPosition++;
       }
@@ -242,11 +253,8 @@ void Posterior::GeneticAlgorithm (const string& gaInputFile,
     // Reconstruct the solution
     vector<float> coeffBest = normConstraint(piBest);
     for (int k = 0; k < K; k++) {
-      vector<int> subK (phi.size());
-      ind2sub(Kvec, k,  subK);
-
       for (size_t i = 0; i < phi.size(); i++) {
-        solution[k][i] = phiBest[i][subK[i]];
+        solution[k][i] = phiBest[i][k];
       }
       solution[k][phi.size()] = coeffBest[k];
     }
@@ -318,15 +326,11 @@ float Posterior::Objective (GAGenome& g) {
     // Inner Summation (k)
     long double innerSum = 0.0;
     for (size_t k = 0; k < _UD->K; k++) {
-      vector<int> subK (_UD->Kvec.size());
-      ind2sub(_UD->Kvec, k,  subK);
 
       // Extract phiK
-      vector<double> phiK (_UD->Kvec.size());
-      int offset = 0;
-      for (size_t i = 0; i < _UD->Kvec.size(); i++) {
-        phiK[i] = genome.gene(offset + subK[i]);
-        offset += _UD->Kvec[i];
+      vector<double> phiK (_UD->D);
+      for (size_t i = 0; i < _UD->D; i++) {
+        phiK[i] = genome.gene(i*_UD->D + k);
       }
 
       innerSum += (long double) coeff[k]
@@ -447,12 +451,7 @@ vector<double> Posterior::bruteForce () {
   }
 
 /* -------------------------------------------------------------------------- */
-  // Checking the number of modes (Ks)
-  int K = 1;
-  for (vector<int>::size_type i = 0; i < phi.size(); i++) {
-    K *= phi[i].K;
-  }
-
+  // Checking the number of modes (K)
   if (K == 1) { // Monomodal posterior
     vector<long double> PostExp   (nElMono, 0);
     vector<double>      Posterior (nElMono, 0);
@@ -493,35 +492,40 @@ vector<double> Posterior::bruteForce () {
     // Storage order: PostMulti = [phi1_1, ..., phi1_k1, ...,
     //                             phiN_1, ..., phiN_kN, ...,
     //                             pi1, ..., piK]
-    // With K = k1 * ... * kN.
 
     int                 nElMulti = 1;           // Number of elements
     vector<int>         sizeMulti;              // Global size vector
-    vector<int>         sizeK (phi.size());     // K size vector
+    // vector<int>         sizeK (phi.size());     // K size vector
 
     long double         maxMultiExp = -1e10;    // Maximum of the posterior
     long double         minMultiExp = 1e10;     // Minimum of the posterior
 
     // Calculate Multimodal posterior ------------------------------------------
     for (vector<int>::size_type i = 0; i < phi.size(); i++) {
-      for (int k = 0; k < phi[i].K; k++) {
-        // Building the size container of the PHIs.
-        sizeMulti.push_back(phi[i].vec.size());
+      vector<int> sizePhi (K, phi[i].vec.size());
+      sizeMulti.insert(sizeMulti.end(), sizePhi.begin(), sizePhi.end());
 
-        // Total number of combinations
-        nElMulti *= phi[i].vec.size();
-      }
-      // Building the size container of each PHI's K.
-      sizeK[i] = phi[i].K;
+      // Total number of combinations
+      nElMulti *= pow(phi[i].vec.size(), K);
+
+      // for (int k = 0; k < K; k++) {
+      //   // Building the size container of the PHIs.
+      //   sizeMulti.push_back(phi[i].vec.size());
+      //
+      //   // Total number of combinations
+      //   nElMulti *= phi[i].vec.size();
+      // }
+      // // Building the size container of each PHI's K.
+      // sizeK[i] = phi[i].K;
     }
 
     // Building the size container of the global indipendent Ks.
-    vector<int> sizeGlobalK (K-1, pi.size());
-    sizeMulti.insert(sizeMulti.end(), sizeGlobalK.begin(), sizeGlobalK.end());
+    vector<int> sizePi (K-1, pi.vec.size());
+    sizeMulti.insert(sizeMulti.end(), sizePi.begin(), sizePi.end());
     vector<int> subMulti (sizeMulti.size());
 
     // Total number of combinations
-    nElMulti *= pow(pi.size(), (K-1));
+    nElMulti *= pow(pi.vec.size(), (K-1));
 
     // Storage array for the Multimodal Posterior
     vector<double>      PostMulti    (nElMulti, 0);
@@ -544,35 +548,35 @@ vector<double> Posterior::bruteForce () {
       // Extract coefficeints and enforce normalization constraint
       vector<double> curr_pi;
       for (vector<int>::size_type i = subMulti.size()-K+1; i < subMulti.size(); i++) {
-        curr_pi.push_back(pi[subMulti[i]]);
+        curr_pi.push_back(pi.vec[subMulti[i]]);
       }
       vector<double> coeff = normConstraint(curr_pi);
 
-      // Generate container for the current parameter (PHI) indices
-      vector<vector<int>> phiInd (phi.size());
-      for (size_t i = 0; i < phi.size(); i++) {
-        int phiInd_i = 0;
-        for (size_t j = 1; j <= i; j++) {
-          phiInd_i += sizeK[j-1];
-        }
-
-        phiInd[i] = vector<int> (subMulti.begin() + phiInd_i,
-                                 subMulti.begin() + phiInd_i + sizeK[i]);
-      }
+      // // Generate container for the current parameter (PHI) indices
+      // vector<vector<int>> phiInd (phi.size());
+      // for (size_t i = 0; i < phi.size(); i++) {
+      //   int phiInd_i = 0;
+      //   for (size_t j = 1; j <= i; j++) {
+      //     phiInd_i += sizeK[j-1];
+      //   }
+      //
+      //   phiInd[i] = vector<int> (subMulti.begin() + phiInd_i,
+      //                            subMulti.begin() + phiInd_i + sizeK[i]);
+      // }
 
       // Inner Summation (k)
       vector<long double> innerSum (data.N, 0);
       for (int k = 0; k < K; k++) {
         // Selecting the Posterior element index corresponding to k
-        vector<int> subK (phi.size());
-        ind2sub(sizeK, k,  subK);
+        // vector<int> subK (phi.size());
+        // ind2sub(sizeK, k,  subK);
 
-        vector<int> phiSub (phi.size());
-        for (size_t i = 0; i < phi.size(); i++) {
-          phiSub[i] = phiInd[i][subK[i]];
+        vector<int> innerSub (phi.size());
+        for (size_t d = 0; d < phi.size(); d++) {
+          innerSub[d] = subMulti[d*K + k];
         }
         int innerInd;
-        sub2ind(sizeMono, phiSub,  innerInd);
+        sub2ind(sizeMono, innerSub,  innerInd);
 
         // Performing the summation;
         vector<long double> rhs = (PostMono[innerInd] * coeff[k]);

@@ -239,17 +239,6 @@ Settings IO::loadSettings(const char *configFile) {
           settings.phi[i].latex = settings.phi[i].name;
         }
 
-        // Get Number of modes
-        try
-        {
-          int K = phi.lookup("K");
-          settings.phi[i].K = K;
-        }
-        catch(const SettingNotFoundException &nfex) // Default
-        {
-          settings.phi[i].K = 1;
-        }
-
         // Get parameter vector
         try
         {
@@ -266,6 +255,7 @@ Settings IO::loadSettings(const char *configFile) {
             for (double value = first; value <= last; value += step) {
             settings.phi[i].vec.push_back(value);
             }
+            settings.phi[i].step = step;
           }
           else
           {
@@ -276,6 +266,7 @@ Settings IO::loadSettings(const char *configFile) {
               double value = vec["vec"][j];
               settings.phi[i].vec[j] = value;
             }
+            settings.phi[i].step = 0;
           }
         }
         catch(const SettingNotFoundException &nfex)
@@ -288,6 +279,17 @@ Settings IO::loadSettings(const char *configFile) {
     catch(const SettingNotFoundException &nfex)
     {
       cerr << "No 'phi' setting in 'dataAnalysis' section in configuration file." << endl;
+    }
+
+    // Get number of modes
+    try
+    {
+      int K = dataAnalysis.lookup("K");
+      settings.K = K;
+    }
+    catch(const SettingNotFoundException &nfex)
+    {
+      settings.K = 1;
     }
 
     // Get Mixing Lenght Coefficients (optional)
@@ -304,19 +306,20 @@ Settings IO::loadSettings(const char *configFile) {
         double last  = pi["vec"][2];
 
         for (double value = first; value <= last; value += step) {
-          settings.pi.push_back(value);
+          settings.pi.vec.push_back(value);
         }
-
+        settings.pi.step = step;
       }
       else
       {
         int count = pi["vec"].getLength();
-        settings.pi.resize(count);
+        settings.pi.vec.resize(count);
 
         for (int i = 0; i < count; i++) {
           double value = pi["vec"][i];
-          settings.pi[i] = value;
+          settings.pi.vec[i] = value;
         }
+        settings.pi.step = 0;
       }
     }
     catch(const SettingNotFoundException &nfex)

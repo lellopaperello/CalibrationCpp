@@ -26,7 +26,8 @@ class Posterior
 public:
   // Constructor
   Posterior(const data_t& DATA, const vector<phi_t>& PHI,
-            const vector<double>& PI, const string& MODEL);
+            const int& NMODES, const pi_t& PI,
+            const string& MODEL);
 
   // Destructor
   ~Posterior() {}
@@ -44,8 +45,8 @@ protected:
   // Structure
   struct userData_t {
     data_t       data;
+    int          D;
     int          K;
-    vector<int>  Kvec;
     string       model;
     double       base;
   };
@@ -54,7 +55,8 @@ private:
   // Attributes
   data_t          data;
   vector<phi_t>   phi;
-  vector<double>  pi;
+  int             K;
+  pi_t            pi;
   string          model;
 
   // Methods
