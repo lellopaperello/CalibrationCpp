@@ -37,8 +37,7 @@ work/
 dataset/
 config/
 bozze/
-res/
-resMegamind/
+res*/
 static_lib/include
 static_lib/lib
 static_lib/share
